@@ -83,7 +83,7 @@ print(binh_phuong(7))
 | `src/storage.js` | Đọc, ghi không gian làm việc phiên bản 1 và kiểm tra tên tệp. |
 | `src/icons.js` | Các biểu tượng Lucide được đưa vào bản dựng. |
 | `public/runner.js` | Khởi tạo Python, chuẩn bị các mô-đun, đọc stdin, truyền kết quả và lỗi về giao diện. |
-| `scripts/runtime.mjs` | Chép các tệp Pyodide đã khóa phiên bản từ npm vào `public/runtime` trước khi chạy dev hoặc build. |
+| `scripts/runtime.mjs` | Chuẩn bị bộ chạy, các gói toán học và danh sách tên import. Kiểm tra SHA-256 của từng gói theo lockfile của Pyodide. |
 | `scripts/serve.mjs`, `Mo-PyLab.cmd` | Máy chủ local và lối tắt Windows. |
 | `vite.config.js`, `package.json`, `package-lock.json` | Đường dẫn tài nguyên tương đối, lệnh dự án và phiên bản thư viện. |
 | `docs/` | Bản web đã dựng, gồm giao diện và bộ chạy Python. Máy chủ local và GitHub Pages đều phục vụ thư mục này. Sửa các tệp nguồn rồi dựng lại để cập nhật. |
@@ -132,9 +132,20 @@ $('copy-code').onclick = async () => {
 }
 ```
 
-**Thay đổi bộ chạy.** Giao diện gửi tên tệp, mã, stdin và bản chụp các tệp tới `public/runner.js`. Worker phát các thông điệp `running`, `text`, `done` hoặc `failure`. Nút Dừng kết thúc worker. Nếu thêm loại kết quả mới, ví dụ một hình vẽ, cần bổ sung cả bên phát trong worker lẫn bên hiển thị trong `src/main.js`.
+**Thay đổi bộ chạy.** Giao diện gửi tên tệp, mã, stdin và bản chụp các tệp tới `public/runner.js`. Worker phát các thông điệp `packages`, `running`, `text`, `done` hoặc `failure`. Nút Dừng kết thúc worker. Nếu thêm loại kết quả mới, ví dụ một hình vẽ, cần bổ sung cả bên phát trong worker lẫn bên hiển thị trong `src/main.js`.
 
-**Phạm vi Python.** Bản phát hành phục vụ Python cơ bản và các mô-đun chuẩn được đóng gói, chẳng hạn `math`, `collections`, `json` và `random`. Thư viện ngoài như NumPy cần được đóng gói thêm bằng bản dành cho Pyodide tương thích. Để hỗ trợ ngoại tuyến, chép các gói và phụ thuộc vào `public/runtime` bằng `scripts/runtime.mjs`, rồi gọi `runtime.loadPackage(...)` trong worker trước khi thực thi. Với thư viện giao diện hoặc đồ họa, cần thêm cách hiển thị đầu ra phù hợp trong trang.
+**Dùng thư viện toán.** Bản web có sẵn SymPy 1.13.3, NumPy 2.0.2 và mpmath 1.3.0 cùng các mô-đun chuẩn như `math` và `random`. Khi gặp `import` hoặc `from … import …` trong tệp đang chạy hoặc mô-đun của bạn, PyLab tự nạp gói cần thiết. Các gói đi kèm bản local nên dùng được khi ngắt Internet. Những thư viện ngoài danh sách cần được bổ sung vào bản dựng.
+
+```python
+import sympy as sp
+
+a = sp.Array([1, 2, 3, 4])
+print(a)  # [1, 2, 3, 4]
+```
+
+Với NumPy, dùng `import numpy as np` rồi gọi `np.array([1, 2, 3, 4])`. Tên hàm, lớp và mô-đun trong Python phân biệt chữ hoa với chữ thường. Dùng `a[0]` để lấy phần tử đầu tiên sau khi tạo mảng.
+
+**Bổ sung gói vào bản web.** Thêm tên phân phối trong `pyodide-lock.json` vào danh sách `['sympy', 'numpy']` của `scripts/runtime.mjs`, rồi chạy `npm run build`. Script lấy cả phụ thuộc, đối chiếu SHA-256 và tạo `bundled-imports.json` từ tên import trong lockfile. Bản dựng ưu tiên dùng lại các gói đã có trên máy. Sau khi thử câu lệnh import trong trình duyệt, commit cả mã nguồn lẫn `docs/` rồi đẩy lên GitHub. Thư viện đồ họa có thể cần thêm giao diện hiển thị kết quả.
 
 **Dữ liệu đã lưu.** Khóa `pylab.workspace.v1` chứa phiên bản, ID tệp đang mở và danh sách tệp gồm ID, tên, mã, stdin và nguồn bài mẫu. Khóa `pylab.theme` chứa tùy chọn sáng/tối. Nếu đổi cấu trúc, thêm bước chuyển dữ liệu cũ trong `readWorkspace()` và thử với bài đã lưu.
 

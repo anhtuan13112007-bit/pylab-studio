@@ -1,5 +1,49 @@
 // Each run has its own worker and Python environment. Terminating the worker
 // also stops native WebAssembly code and tight Python loops.
+// Walk imports only in the entry point and the workspace modules it references.
+// Parsing never executes student code. A syntax error is reported by the normal runner.
+async function loadWorkspacePackages(runtime, filename, indexURL) {
+  const response = await fetch(new URL('bundled-imports.json', indexURL))
+  if (!response.ok) throw new Error('Không đọc được danh sách thư viện của PyLab. Hãy tải lại trang.')
+  const bundled = await response.json()
+  runtime.globals.set('_entry', filename)
+  const imports = JSON.parse(runtime.runPython(`
+from pathlib import Path
+from pyodide.code import find_imports
+import json
+
+def _workspace_imports(entry):
+    root = Path('/home/pyodide')
+    pending = [root / entry]
+    visited = set()
+    external = set()
+    while pending:
+        file = pending.pop()
+        if file in visited:
+            continue
+        visited.add(file)
+        try:
+            names = find_imports(file.read_text(encoding='utf-8'))
+        except (SyntaxError, ValueError):
+            continue
+        for name in names:
+            local = root / (name + '.py')
+            if local.is_file():
+                pending.append(local)
+            else:
+                external.add(name)
+    return sorted(external)
+
+json.dumps(_workspace_imports(_entry))
+`))
+  const names = [...new Set(imports.filter(name => Object.hasOwn(bundled, name)).map(name => bundled[name]))]
+  if (!names.length) return
+  self.postMessage({type:'packages', names})
+  await runtime.loadPackage(names, {checkIntegrity:true, messageCallback:()=>{}, errorCallback:message=>console.warn(message)})
+  const missing = names.filter(name => !Object.hasOwn(runtime.loadedPackages, name))
+  if (missing.length) throw new Error('Không tải được thư viện ' + missing.join(', ') + '. Hãy kiểm tra kết nối tới PyLab và chạy lại.')
+}
+
 self.onmessage = async ({data}) => {
   let runtime, stream = '', buffer = '', written = 0, truncated = false, lastSent = 0
   const start = performance.now()
@@ -30,6 +74,7 @@ self.onmessage = async ({data}) => {
         runtime.FS.writeFile(folder + '/' + file.name, file.code, {encoding:'utf8'})
       }
     }
+    await loadWorkspacePackages(runtime, data.name, indexURL)
     runtime.globals.set('_echo', text => append('input', text))
     runtime.globals.set('_source',data.code)
     runtime.globals.set('_filename',data.name)
@@ -61,6 +106,8 @@ except SystemExit as _exc:
 except BaseException as _exc:
     _ok = False
     traceback.print_exception(type(_exc), _exc, _exc.__traceback__.tb_next)
+    if isinstance(_exc, ModuleNotFoundError):
+        print("PyLab có sẵn SymPy, NumPy và mpmath. Nếu đang nhập một tệp tự viết, hãy kiểm tra tên tệp trong thanh bên.", file=sys.stderr)
     if isinstance(_exc, EOFError):
         print("Gợi ý: điền thêm dữ liệu vào thẻ Đầu vào rồi chạy lại.", file=sys.stderr)
 sys.stdout.flush()

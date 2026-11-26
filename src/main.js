@@ -238,9 +238,10 @@ function runOrStop() {
   if(task){stop();return}
   resetConsole();$('command').textContent='$ python '+current().name;status('Đang nạp Python…','busy');runButton(true)
   try {
-    const worker=new Worker(new URL('runner.js',document.baseURI));task=worker
+    const worker=new Worker(new URL('runner.js?v=2',document.baseURI));task=worker
     worker.onmessage=({data})=>{
       if(task!==worker)return
+      if(data.type==='packages')status('Đang nạp '+data.names.join(', ')+'…','busy')
       if(data.type==='running')status('Đang chạy…','busy')
       if(data.type==='text')appendOutput(data.text,data.stream==='err',data.stream==='input')
       if(data.type==='done'){
