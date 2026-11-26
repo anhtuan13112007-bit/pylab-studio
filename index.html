@@ -35,14 +35,14 @@
     </header>
     <main>
       <section id="studio-page">
-        <section class="hero" aria-labelledby="hero-title"><canvas id="terrain" aria-hidden="true"></canvas>
+        <section class="hero" id="hero" aria-labelledby="hero-title"><div class="hero-photo" aria-hidden="true"></div><button id="appearance" class="hero-settings" title="Tùy chỉnh hình nền" aria-label="Tùy chỉnh hình nền">✎ <span>Hình nền</span></button><canvas id="terrain" aria-hidden="true"></canvas>
           <div class="hero-content"><div class="hero-kicker"><span></span> PYTHON STUDIO</div>
           <h1 id="hero-title">Phòng thực hành Python<span>.</span></h1>
           <p>Viết mã, chạy thử và khám phá Python ngay trong trình duyệt.</p></div>
         </section>
         <section id="workspace" tabindex="-1" aria-labelledby="workspace-heading">
           <div class="section-head"><h2 id="workspace-heading">Bàn làm việc</h2>
-            <button class="primary" id="run"><i data-i="play"></i><span>Chạy mã</span><kbd>Ctrl ↵</kbd></button>
+            <div class="run-tools"><button class="secondary" id="packages" type="button">Gói Python</button><button class="primary" id="run"><i data-i="play"></i><span>Chạy mã</span><kbd>Ctrl B</kbd></button></div>
           </div>
           <div class="panels">
             <section class="pane editor-pane" aria-label="Trình soạn mã Python">
@@ -57,8 +57,8 @@
                 <button class="term-tab active" id="output-tab" role="tab" aria-selected="true" aria-controls="out-panel"><i data-i="terminal"></i>Terminal</button>
                 <button class="term-tab" id="stdin-tab" role="tab" aria-selected="false" aria-controls="in-panel">Đầu vào</button>
               </div><button class="icon" id="clear" title="Xóa kết quả" aria-label="Xóa kết quả"><i data-i="trash-2"></i></button></div>
-              <div id="out-panel" role="tabpanel" aria-labelledby="output-tab" class="out-panel"><div id="command" class="command"></div><pre id="output"></pre></div>
-              <div id="in-panel" role="tabpanel" aria-labelledby="stdin-tab" class="in-panel" hidden><label for="stdin">Dữ liệu cho <code>input()</code></label><small>Nhập mỗi giá trị trên một dòng trước khi chạy.</small><textarea id="stdin" spellcheck="false" placeholder="Ví dụ: An"></textarea></div>
+              <div id="out-panel" role="tabpanel" aria-labelledby="output-tab" class="out-panel"><div id="command" class="command"></div><pre id="output"></pre><form id="terminal-form" class="terminal-prompt" hidden><span aria-hidden="true">›</span><input id="terminal-line" aria-label="Nhập trực tiếp trong Terminal" autocomplete="off" placeholder="Nhập rồi nhấn Enter"><button type="submit" title="Gửi dòng">Gửi</button><button type="button" id="terminal-eof" title="Kết thúc đầu vào (Ctrl+D)">EOF</button></form></div>
+              <div id="in-panel" role="tabpanel" aria-labelledby="stdin-tab" class="in-panel" hidden><label for="input-mode">Nguồn nhập liệu</label><select id="input-mode"><option value="terminal">Nhập ngay trong Terminal</option><option value="batch">Dùng các dòng nhập sẵn</option></select><label for="stdin">Dữ liệu nhập sẵn</label><textarea id="stdin" spellcheck="false" placeholder="Ví dụ: An"></textarea></div>
               <div class="term-foot"><span id="run-state" role="status"><span class="dot"></span>Sẵn sàng</span><span id="elapsed"></span></div>
             </section>
           </div>
@@ -72,6 +72,16 @@
     </main>
   </div>
   <dialog id="modal"><form method="dialog" class="dialog-box"><div class="dialog-head"><h2 id="modal-title"></h2><button class="icon" value="cancel" aria-label="Đóng" formnovalidate><i data-i="x"></i></button></div><div id="modal-body"></div><div class="dialog-actions" id="modal-actions"></div></form></dialog>
+  <dialog id="appearance-dialog" aria-labelledby="appearance-title"><form id="appearance-form" class="dialog-box">
+    <div class="dialog-head"><h2 id="appearance-title">Tùy chỉnh hình nền</h2><button type="button" id="appearance-close" class="icon" aria-label="Đóng tùy chỉnh"><i data-i="x"></i></button></div>
+    <div class="appearance-preview hero" aria-label="Xem trước banner"><div class="hero-photo"></div><canvas id="preview-art" aria-hidden="true"></canvas><strong>Python Studio</strong></div>
+    <div class="appearance-fields"><label>Hình minh họa<select id="art-mode"><option value="terrain">Địa hình</option><option value="wave">Sóng biển</option><option value="stars">Bầu trời sao</option><option value="plain">Màu trơn</option><option value="image">Ảnh của tôi</option></select></label>
+    <label id="image-control" hidden>Chọn ảnh trên thiết bị<input id="art-file" type="file" accept="image/jpeg,image/png,image/webp"></label>
+    <label>Màu banner<input id="art-color" type="color" value="#193e2b"></label>
+    <label>Độ đậm hình <output id="opacity-value"></output><input id="art-opacity" aria-label="Độ đậm hình" type="range" min="0" max="100" step="5"></label>
+    <label>Nền trang<select id="page-palette"><option value="auto">Theo giao diện</option><option value="sky">Xanh trời</option><option value="lavender">Tím nhạt</option><option value="sand">Cát ấm</option></select></label></div>
+    <p id="appearance-note" role="status"></p><div class="dialog-actions"><button type="button" id="appearance-default" class="secondary">Mặc định</button><button type="submit" class="primary">Lưu giao diện</button></div>
+  </form></dialog>
   <div id="toast" role="status" hidden></div>
   <script type="module" src="./src/main.js"></script>
 </body></html>

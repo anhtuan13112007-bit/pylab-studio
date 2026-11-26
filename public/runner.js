@@ -1,48 +1,6 @@
 // Each run has its own worker and Python environment. Terminating the worker
 // also stops native WebAssembly code and tight Python loops.
-// Walk imports only in the entry point and the workspace modules it references.
-// Parsing never executes student code. A syntax error is reported by the normal runner.
-async function loadWorkspacePackages(runtime, filename, indexURL) {
-  const response = await fetch(new URL('bundled-imports.json', indexURL))
-  if (!response.ok) throw new Error('Không đọc được danh sách thư viện của PyLab. Hãy tải lại trang.')
-  const bundled = await response.json()
-  runtime.globals.set('_entry', filename)
-  const imports = JSON.parse(runtime.runPython(`
-from pathlib import Path
-from pyodide.code import find_imports
-import json
-
-def _workspace_imports(entry):
-    root = Path('/home/pyodide')
-    pending = [root / entry]
-    visited = set()
-    external = set()
-    while pending:
-        file = pending.pop()
-        if file in visited:
-            continue
-        visited.add(file)
-        try:
-            names = find_imports(file.read_text(encoding='utf-8'))
-        except (SyntaxError, ValueError):
-            continue
-        for name in names:
-            local = root / (name + '.py')
-            if local.is_file():
-                pending.append(local)
-            else:
-                external.add(name)
-    return sorted(external)
-
-json.dumps(_workspace_imports(_entry))
-`))
-  const names = [...new Set(imports.filter(name => Object.hasOwn(bundled, name)).map(name => bundled[name]))]
-  if (!names.length) return
-  self.postMessage({type:'packages', names})
-  await runtime.loadPackage(names, {checkIntegrity:true, messageCallback:()=>{}, errorCallback:message=>console.warn(message)})
-  const missing = names.filter(name => !Object.hasOwn(runtime.loadedPackages, name))
-  if (missing.length) throw new Error('Không tải được thư viện ' + missing.join(', ') + '. Hãy kiểm tra kết nối tới PyLab và chạy lại.')
-}
+importScripts('./package-loader.js?v=3')
 
 self.onmessage = async ({data}) => {
   let runtime, stream = '', buffer = '', written = 0, truncated = false, lastSent = 0
@@ -74,15 +32,37 @@ self.onmessage = async ({data}) => {
         runtime.FS.writeFile(folder + '/' + file.name, file.code, {encoding:'utf8'})
       }
     }
-    await loadWorkspacePackages(runtime, data.name, indexURL)
+    const issues = await loadWorkspacePackages(runtime, data.name, data.requirements || '', indexURL)
+    runtime.globals.set('_package_issues', JSON.stringify(issues))
     runtime.globals.set('_echo', text => append('input', text))
+    let seq = 0, eof = false
+    if (data.interactive) {
+      runtime.setStdin({isatty:true, stdin() {
+        if (eof) return null
+        flush()
+        if (!data.owner) throw new Error('Terminal cần Service Worker. Hãy dùng thẻ Đầu vào hoặc mở PyLab trong trình duyệt qua HTTPS/localhost.')
+        const request = JSON.stringify({owner:data.owner,token:data.token,seq:++seq})
+        while (true) {
+          const xhr = new XMLHttpRequest()
+          xhr.open('POST', new URL('__terminal_input__', self.location.href), false)
+          xhr.send(request)
+          if (xhr.status !== 200) throw new Error('Mất kết nối nhập liệu. Hãy tải lại trang hoặc dùng thẻ Đầu vào.')
+          const value = JSON.parse(xhr.responseText)
+          if (value.pending) continue
+          if (value.closed || value.eof) { eof=true; return null }
+          append('input',value.line+'\n');flush()
+          return value.line+'\n'
+        }
+      }})
+    }
+    runtime.globals.set('_interactive',Boolean(data.interactive))
     runtime.globals.set('_source',data.code)
     runtime.globals.set('_filename',data.name)
     runtime.globals.set('_stdin',data.stdin)
     self.postMessage({type:'running'})
     const execTime = performance.now()
     const ok = await runtime.runPythonAsync(`
-import io, sys, traceback, linecache, os
+import ast, inspect, io, json, sys, traceback, linecache, os
 class _TerminalInput(io.StringIO):
     def readline(self, *args):
         line = super().readline(*args)
@@ -91,14 +71,18 @@ class _TerminalInput(io.StringIO):
             _echo(line if line.endswith(chr(10)) else line + chr(10))
         return line
 
-sys.stdin = _TerminalInput(_stdin)
+if not _interactive:
+    sys.stdin = _TerminalInput(_stdin)
 sys.argv = [_filename]
 os.chdir('/home/pyodide')
 sys.path.insert(0, os.getcwd())
 linecache.cache[_filename] = (len(_source), None, _source.splitlines(True), _filename)
 _ok = True
 try:
-    exec(compile(_source, _filename, 'exec'), {'__name__':'__main__', '__file__':_filename})
+    _compiled = compile(_source, _filename, 'exec', flags=ast.PyCF_ALLOW_TOP_LEVEL_AWAIT)
+    _result = eval(_compiled, {'__name__':'__main__', '__file__':_filename})
+    if inspect.isawaitable(_result):
+        await _result
 except SystemExit as _exc:
     _ok = _exc.code is None or _exc.code == 0
     if not _ok:
@@ -107,9 +91,13 @@ except BaseException as _exc:
     _ok = False
     traceback.print_exception(type(_exc), _exc, _exc.__traceback__.tb_next)
     if isinstance(_exc, ModuleNotFoundError):
-        print("PyLab có sẵn SymPy, NumPy và mpmath. Nếu đang nhập một tệp tự viết, hãy kiểm tra tên tệp trong thanh bên.", file=sys.stderr)
+        _module = (_exc.name or "").partition(".")[0]
+        _reason = json.loads(_package_issues).get(_module)
+        if _reason:
+            print(_reason, file=sys.stderr)
+        print("Mở Gói Python để chọn tên gói trên PyPI hoặc xuất notebook chạy bằng CPython.", file=sys.stderr)
     if isinstance(_exc, EOFError):
-        print("Gợi ý: điền thêm dữ liệu vào thẻ Đầu vào rồi chạy lại.", file=sys.stderr)
+        print("Đã kết thúc luồng nhập. Bạn có thể chạy lại hoặc bổ sung dữ liệu ở thẻ Đầu vào.", file=sys.stderr)
 sys.stdout.flush()
 sys.stderr.flush()
 _ok

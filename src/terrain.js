@@ -1,5 +1,5 @@
 // A perspective height field with hidden surfaces painted from back to front.
-export function drawTerrain(canvas) {
+export function drawTerrain(canvas, mode = () => 'terrain') {
   function paint() {
     const {width, height} = canvas.getBoundingClientRect()
     if (!width || !height) return
@@ -13,6 +13,30 @@ export function drawTerrain(canvas) {
     const fit = Math.min(width / w, height / h)
     c.translate(width - w * fit, height - h * fit)
     c.scale(fit, fit)
+    const scene = mode()
+    if (scene === 'plain' || scene === 'image') return
+    if (scene === 'stars') {
+      let seed = 134
+      function random() { seed=(1664525*seed+1013904223)>>>0;return seed/4294967296 }
+      for(let i=0;i<95;i++){
+        c.fillStyle='rgba(236,244,255,'+(.32+random()*.65)+')'
+        c.beginPath();c.arc(random()*w,random()*h,.45+random()*1.3,0,Math.PI*2);c.fill()
+      }
+      c.fillStyle='#f6e4b7';c.beginPath();c.arc(432,58,18,0,Math.PI*2);c.fill()
+      return
+    }
+    if (scene === 'wave') {
+      for(let n=0;n<26;n++){
+        c.strokeStyle='rgba(167,234,227,'+(.24+n*.017)+')'
+        c.lineWidth=1.2;c.beginPath()
+        for(let x=0;x<=w;x+=4){
+          const y=78+n*4+Math.sin(x/77+n*.13)*23+Math.cos(x/122-n*.095)*15
+          if(x===0)c.moveTo(x,y);else c.lineTo(x,y)
+        }
+        c.stroke()
+      }
+      return
+    }
     c.fillStyle = '#d6e992'
     c.beginPath(); c.arc(430, 48, 24, 0, Math.PI * 2); c.fill()
     function point(i, j) {
@@ -40,4 +64,5 @@ export function drawTerrain(canvas) {
   }
   const observer = new ResizeObserver(paint)
   observer.observe(canvas); paint()
+  return paint
 }

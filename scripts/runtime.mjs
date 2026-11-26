@@ -16,7 +16,7 @@ function include(name) {
   bundled.add(name)
   for (const dependency of lock.packages[name].depends) include(dependency)
 }
-for (const name of ['sympy', 'numpy']) include(name)
+for (const name of ['sympy', 'numpy', 'pandas', 'scipy', 'micropip']) include(name)
 
 function matches(bytes, entry) {
   return createHash('sha256').update(bytes).digest('hex') === entry.sha256
@@ -51,3 +51,13 @@ for (const name of bundled) {
   for (const module of lock.packages[name].imports) imports[module] = name
 }
 await writeFile(new URL('bundled-imports.json', destination), JSON.stringify(imports) + '\n')
+
+// Pyodide resolves package downloads relative to its local runtime. Keep that
+// runtime available offline and route only the remaining pinned archives to the CDN.
+const catalog = { imports: {}, remoteFiles: [], cdn: 'https://cdn.jsdelivr.net/pyodide/v' + lock.info.version + '/full/' }
+for (const [name, entry] of Object.entries(lock.packages)) {
+  if (name.endsWith('-tests')) continue
+  for (const module of entry.imports) catalog.imports[module] = name
+  if (!bundled.has(name)) catalog.remoteFiles.push(entry.file_name)
+}
+await writeFile(new URL('package-sources.json', destination), JSON.stringify(catalog) + '\n')

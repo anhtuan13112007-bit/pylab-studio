@@ -35,7 +35,8 @@ Mở địa chỉ máy chủ in ra, mặc định là `http://127.0.0.1:4173`. M
 | Trình soạn thảo | Tô màu cú pháp, đánh số dòng, thụt lề 4 dấu cách, đánh dấu cặp ngoặc, gấp khối, tìm trong mã và hoàn tác. Thanh dưới hiển thị vị trí con trỏ. |
 | Bàn làm việc | Chạy tệp đang mở, dừng ngay cả khi mã lặp vô hạn, tải tệp hiện tại hoặc mở rộng vùng làm việc. Mỗi lần chạy dùng một môi trường Python mới. |
 | Terminal | Xem lệnh chạy, kết quả, lỗi và thời gian thực thi sau khi nạp Python. Traceback hiển thị tên tệp và số dòng. Nút thùng rác xóa phần hiển thị. Đầu ra giới hạn 65.536 ký tự để bảo vệ độ phản hồi. |
-| Đầu vào | Điền trước dữ liệu cho `input()`, mỗi giá trị một dòng. Khi thiếu dòng, Terminal hiển thị lỗi EOF và gợi ý bổ sung. Mỗi tệp giữ riêng dữ liệu nhập. |
+| Đầu vào | Tệp mới nhận dữ liệu trực tiếp trong Terminal. Gõ một dòng tại dấu nhắc rồi bấm Enter. Dùng Ctrl+D hoặc nút EOF để báo kết thúc luồng nhập. Thẻ Đầu vào cho phép chuyển sang dữ liệu soạn sẵn để chạy lại một bộ test. Tệp cũ có sẵn dữ liệu vẫn dùng chế độ soạn sẵn. |
+| Hình nền | Chọn **Hình nền** ở góc trên bên phải banner. Xem trước địa hình, sóng biển, bầu trời sao, màu trơn hoặc ảnh JPG/PNG/WebP của bạn. Đổi màu banner, độ đậm và sắc nền trang, rồi bấm **Lưu giao diện**. **Mặc định** khôi phục thiết kế ban đầu. |
 | Tệp và mô-đun | Tất cả tệp trong thanh bên được đưa vào thư mục Python ảo của lần chạy. Có thể dùng `import` giữa các tệp. Những tệp mới do chính chương trình Python ghi ra chỉ tồn tại trong lần chạy đó. |
 | Thư viện mẫu | 8 bài về biến, nhập liệu, vòng lặp, dữ liệu và toán học. Tìm theo tên, chủ đề, tên tệp hoặc mô tả. Mở lại một mẫu sẽ quay về bản bạn đã sửa. |
 | Thiết bị và hiển thị | Bài làm và giao diện sáng/tối được lưu trong trình duyệt. Máy tính hiển thị mã và kết quả cạnh nhau. Điện thoại xếp hai khung theo chiều dọc và thu thanh bên vào nút menu. |
@@ -46,12 +47,27 @@ Trang mở đầu tự chạy bài chào mẫu khi không gian chỉ còn tệp 
 
 | Phím | Tác dụng |
 | --- | --- |
-| `Ctrl+Enter` hoặc `⌘+Enter` | Chạy hoặc dừng chương trình |
+| `Ctrl+B` hoặc `Ctrl+Enter` (⌘ trên Mac) | Chạy hoặc dừng chương trình |
+| `Shift+F5` | Dừng chương trình, kể cả khi đang chờ nhập |
+| `Enter` trong dòng nhập Terminal | Gửi một dòng, kể cả dòng trống |
+| `Ctrl+D` trong dòng nhập Terminal | Báo kết thúc luồng nhập |
 | `Ctrl+S` hoặc `⌘+S` | Lưu trên trình duyệt và tải tệp đang mở |
 | `Ctrl+F` hoặc `⌘+F` trong vùng mã | Tìm trong tệp |
 | `Tab` / `Shift+Tab` | Tăng / giảm thụt lề |
 | `Esc`, sau đó `Tab` | Rời trình soạn thảo bằng bàn phím |
 | `Esc` | Thoát chế độ mở rộng hoặc đóng hộp thoại |
+
+### Thử nhập trực tiếp trong Terminal
+
+Tạo một tệp trống, dán đoạn mã dưới đây và nhấn **Ctrl+B**. Khi Terminal hỏi từng câu, nhập câu trả lời rồi nhấn Enter. Ví dụ nhập `An` rồi `7` sẽ in ra `An: 49`.
+
+```python
+ten = input("Tên: ")
+n = int(input("Số: "))
+print(f"{ten}: {n ** 2}")
+```
+
+Để chuyển một bài mẫu đang dùng dữ liệu có sẵn sang nhập trực tiếp, mở **Đầu vào → Nguồn nhập liệu → Nhập ngay trong Terminal** rồi chạy lại. Nhập trực tiếp cần trình duyệt cho phép Service Worker trên HTTPS hoặc localhost. Nếu trình duyệt chặn tính năng này, chọn **Dùng các dòng nhập sẵn**.
 
 ### Thử import giữa hai tệp
 
@@ -76,12 +92,15 @@ print(binh_phuong(7))
 | `index.html` | Nội dung tiếng Việt, bố cục thanh bên, hai bảng làm việc, thư viện và hộp thoại. |
 | `src/style.css` | Bố cục, màu sáng/tối, nút, thẻ bài, các điểm chuyển giao diện theo chiều rộng màn hình. |
 | `src/editor-colors.css` | Màu cú pháp Python và kiểu hiển thị hàng tệp. |
-| `src/terrain.js` và `public/favicon.svg` | Minh họa địa hình được vẽ trên canvas và biểu trưng PyLab. |
+| `src/appearance.js`, `src/terrain.js`, `public/favicon.svg` | Tùy chỉnh hình nền, xử lý ảnh trên thiết bị, vẽ minh họa và biểu trưng. |
+| `src/terminal.js`, `public/terminal-sw.js` | Chuyển một dòng nhập từ giao diện tới luồng stdin đang chờ trong Web Worker. Mỗi lượt chạy có mã riêng. Service Worker chỉ xử lý yêu cầu nhập của PyLab. |
 | `src/main.js` | Điều hướng, nút bấm, quản lý tệp, lọc mẫu, chủ đề, phím tắt và giao tiếp với Web Worker. |
 | `src/editor.js` | Cấu hình CodeMirror, chế độ Python, tô màu và theo dõi vị trí con trỏ. |
 | `src/examples.js` | Nội dung mặc định `starter`, dữ liệu ví dụ và danh sách 3 mẫu đầu xuất hiện ở bàn làm việc. |
 | `src/storage.js` | Đọc, ghi không gian làm việc phiên bản 1 và kiểm tra tên tệp. |
 | `src/icons.js` | Các biểu tượng Lucide được đưa vào bản dựng. |
+| `public/workspace-imports.py`, `public/install-packages.py`, `public/package-loader.js` | Quét tệp của bài, nạp gói đã khai báo, phân giải các import và định tuyến các bản dựng Pyodide tới nguồn tương ứng. |
+| `src/notebook.js` | Xuất toàn bộ bài tập, dữ liệu đầu vào và danh sách gói sang notebook Jupyter/Colab. |
 | `public/runner.js` | Khởi tạo Python, chuẩn bị các mô-đun, đọc stdin, truyền kết quả và lỗi về giao diện. |
 | `scripts/runtime.mjs` | Chuẩn bị bộ chạy, các gói toán học và danh sách tên import. Kiểm tra SHA-256 của từng gói theo lockfile của Pyodide. |
 | `scripts/serve.mjs`, `Mo-PyLab.cmd` | Máy chủ local và lối tắt Windows. |
@@ -134,7 +153,29 @@ $('copy-code').onclick = async () => {
 
 **Thay đổi bộ chạy.** Giao diện gửi tên tệp, mã, stdin và bản chụp các tệp tới `public/runner.js`. Worker phát các thông điệp `packages`, `running`, `text`, `done` hoặc `failure`. Nút Dừng kết thúc worker. Nếu thêm loại kết quả mới, ví dụ một hình vẽ, cần bổ sung cả bên phát trong worker lẫn bên hiển thị trong `src/main.js`.
 
-**Dùng thư viện toán.** Bản web có sẵn SymPy 1.13.3, NumPy 2.0.2 và mpmath 1.3.0 cùng các mô-đun chuẩn như `math` và `random`. Khi gặp `import` hoặc `from … import …` trong tệp đang chạy hoặc mô-đun của bạn, PyLab tự nạp gói cần thiết. Các gói đi kèm bản local nên dùng được khi ngắt Internet. Những thư viện ngoài danh sách cần được bổ sung vào bản dựng.
+### Import thư viện
+
+**Gói đi kèm.** Bản local có pandas 2.2.3, SciPy 1.14.1, NumPy 2.0.2, SymPy 1.13.3, mpmath 1.3.0, micropip và các phụ thuộc tương ứng. Bạn có thể chạy các bài dùng chúng khi ngắt Internet. Khi truy cập web công khai, trình duyệt tải những tệp cần thiết từ GitHub Pages.
+
+**Tự tìm gói.** Bấm **Chạy mã** sau khi viết `import` hoặc `from … import …`. PyLab đọc các lệnh import trong bài và trong các tệp Python mà bài đó sử dụng. Bộ nạp ưu tiên mô-đun có sẵn, tra danh mục Pyodide của bản phát hành, rồi thử tên mô-đun trên PyPI qua micropip. Các gói tải qua mạng cần kết nối tới jsDelivr, PyPI hoặc máy chủ tệp của PyPI. Chỉ tên gói và thông tin cần tải được gửi đến kho gói.
+
+**Tên gói khác tên import.** Trong **Gói Python**, điền tên phân phối, mỗi dòng một tên, rồi bấm **Lưu**. Ví dụ khai báo `python-slugify` và viết `from slugify import slugify`. Cũng có thể chọn phiên bản, ví dụ `humanize==4.12.3`. Danh sách áp dụng cho không gian làm việc và được ghi nhớ khi tải lại. Khai báo rõ tên gói nếu chương trình dùng import động. Với yêu cầu riêng trong mã, cũng có thể dùng `import micropip` và `await micropip.install("tên-gói")`.
+
+**Thử pandas và SciPy.**
+
+```python
+import pandas as pd
+from scipy.linalg import det
+
+print(pd.Series([2, 4, 6]).mean())  # 4.0
+print(det([[1, 2], [3, 4]]))       # xấp xỉ -2
+```
+
+**Giới hạn trình duyệt.** PyPI cung cấp nhiều bản dựng cho những hệ điều hành và phiên bản Python khác nhau. PyLab chạy được các gói có wheel Python thuần hoặc phù hợp với môi trường WebAssembly và các phụ thuộc của chúng. Thư viện cần driver GPU, tiến trình hệ điều hành, cửa sổ desktop hoặc extension native có thể cần kernel CPython.
+
+**Chạy bằng Jupyter hoặc Google Colab.** Trong **Gói Python → Xuất notebook**, tải tệp `.ipynb` rồi mở bằng Jupyter trên máy hoặc tải vào Colab. Ba ô mã lần lượt khôi phục các tệp của bài vào một thư mục tạm, cài thư viện bằng pip trong kernel, rồi chạy tệp đã chọn với dữ liệu đầu vào của nó. Có thể chỉnh danh sách gói trong ô cài đặt. Chọn kernel có phiên bản Python, hệ điều hành và phần cứng phù hợp. Việc xuất notebook diễn ra trên thiết bị của bạn.
+
+**Ví dụ SymPy.**
 
 ```python
 import sympy as sp
@@ -145,9 +186,9 @@ print(a)  # [1, 2, 3, 4]
 
 Với NumPy, dùng `import numpy as np` rồi gọi `np.array([1, 2, 3, 4])`. Tên hàm, lớp và mô-đun trong Python phân biệt chữ hoa với chữ thường. Dùng `a[0]` để lấy phần tử đầu tiên sau khi tạo mảng.
 
-**Bổ sung gói vào bản web.** Thêm tên phân phối trong `pyodide-lock.json` vào danh sách `['sympy', 'numpy']` của `scripts/runtime.mjs`, rồi chạy `npm run build`. Script lấy cả phụ thuộc, đối chiếu SHA-256 và tạo `bundled-imports.json` từ tên import trong lockfile. Bản dựng ưu tiên dùng lại các gói đã có trên máy. Sau khi thử câu lệnh import trong trình duyệt, commit cả mã nguồn lẫn `docs/` rồi đẩy lên GitHub. Thư viện đồ họa có thể cần thêm giao diện hiển thị kết quả.
+**Đóng gói thêm thư viện để học ngoại tuyến.** Thêm tên phân phối có trong lockfile vào danh sách ở `scripts/runtime.mjs`, rồi chạy `npm run build`. Script lấy cả phụ thuộc, kiểm tra SHA-256 và tạo danh mục cho bộ nạp. Danh mục vừa mô tả tên import vừa xác định tài nguyên nào cần lấy từ CDN. Sau khi thử, commit cả mã nguồn lẫn `docs/`. Thư viện đồ họa có thể cần thêm giao diện để hiển thị kết quả.
 
-**Dữ liệu đã lưu.** Khóa `pylab.workspace.v1` chứa phiên bản, ID tệp đang mở và danh sách tệp gồm ID, tên, mã, stdin và nguồn bài mẫu. Khóa `pylab.theme` chứa tùy chọn sáng/tối. Nếu đổi cấu trúc, thêm bước chuyển dữ liệu cũ trong `readWorkspace()` và thử với bài đã lưu.
+**Dữ liệu đã lưu.** Khóa `pylab.workspace.v1` chứa phiên bản, ID tệp đang mở, danh sách gói `requirements` và danh sách tệp gồm ID, tên, mã, stdin và nguồn bài mẫu. Khóa `pylab.theme` chứa tùy chọn sáng/tối. `pylab.appearance.v1` lưu loại hình nền, màu, độ đậm và ảnh đã thu nhỏ trên thiết bị. Tùy chọn nguồn nhập `inputMode` được lưu theo tệp. Nếu đổi cấu trúc, thêm bước chuyển dữ liệu cũ trong `readWorkspace()` và thử với bài đã lưu.
 
 ## 7. Cập nhật web trên GitHub Pages
 

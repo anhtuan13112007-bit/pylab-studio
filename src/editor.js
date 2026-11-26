@@ -16,7 +16,7 @@ const colors = HighlightStyle.define([
 
 export function createEditor(parent, doc, onChange, onCursor, run) {
   const extensions = [
-    keymap.of([{key:'Mod-Enter',run:()=>{run();return true}}]),
+    keymap.of(['Mod-b','Mod-Enter'].map(key=>({key,run:()=>{run();return true}}))),
     basicSetup, python(), syntaxHighlighting(colors), keymap.of([indentWithTab]), indentUnit.of('    '),
     EditorState.tabSize.of(4),
     EditorView.contentAttributes.of({'aria-label':'Mã nguồn Python', spellcheck:'false', autocapitalize:'off'}),

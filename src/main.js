@@ -4,7 +4,9 @@ import { createEditor } from './editor.js'
 import { starter, examples } from './examples.js'
 import { readWorkspace, writeWorkspace, validName, availableName } from './storage.js'
 import { icon, renderIcons } from './icons.js'
-import { drawTerrain } from './terrain.js'
+import { setupAppearance } from './appearance.js'
+// The notebook exporter is loaded when a notebook is requested.
+import { terminalClient, setTerminalRun, handleReads } from './terminal.js'
 
 const $ = id => document.getElementById(id)
 const all = selector => [...document.querySelectorAll(selector)]
@@ -22,7 +24,7 @@ let view = 'studio'
 const editor = createEditor($('editor'), current().code, code => {
   current().code = code; scheduleSave()
 }, (line,col) => { $('cursor').textContent = 'Dòng '+line+', cột '+col }, runOrStop)
-drawTerrain($('terrain'))
+setupAppearance(notify)
 
 function notify(message) {
   clearTimeout(toastTimer); $('toast').textContent=message; $('toast').hidden=false
@@ -89,6 +91,7 @@ function navigate(page) { if(location.hash==='#'+page)route();else location.hash
 all('[data-route]').forEach(btn=>{btn.onclick=()=>navigate(btn.dataset.route)})
 window.addEventListener('hashchange',route)
 function showFiles() {
+  $('input-mode').value=current().inputMode || (current().stdin ? 'batch':'terminal')
   const list=$('file-list');list.replaceChildren()
   for(const file of workspace.files) {
     const row=elem('div','file-row')
@@ -216,7 +219,9 @@ for(const id of ['output-tab','stdin-tab']) $(id).onkeydown=e=>{
     e.preventDefault();const input=e.key==='End'||(e.key!=='Home'&&id==='output-tab');tab(input);$(input?'stdin-tab':'output-tab').focus()
   }
 }
-$('stdin').oninput=()=>{current().stdin=$('stdin').value;scheduleSave()}
+$('input-mode').onchange=()=>{current().inputMode=$('input-mode').value;scheduleSave()}
+$('stdin').oninput=()=>{current().stdin=$('stdin').value;current().inputMode='batch';$('input-mode').value='batch';scheduleSave()}
+handleReads(()=>{tab(false);status('Chờ nhập dữ liệu…','busy')},()=>status('Đang chạy…','busy'))
 function status(text,type='') { $('run-state').replaceChildren(elem('span','dot '+type),document.createTextNode(text)) }
 function resetConsole() {
   $('output').replaceChildren();$('command').textContent='';$('elapsed').textContent='';tab(false);status('Sẵn sàng')
@@ -225,20 +230,27 @@ $('clear').onclick=()=>{ $('output').replaceChildren();$('command').textContent=
 function runButton(busy) {
   $('run').classList.toggle('running',busy)
   const mac=/Mac|iPhone|iPad/.test(navigator.platform)
-  $('run').replaceChildren(icon(busy?'square':'play'),elem('span','',busy?'Dừng':'Chạy mã'),elem('kbd','',mac?'⌘ ↵':'Ctrl ↵'))
+  $('run').replaceChildren(icon(busy?'square':'play'),elem('span','',busy?'Dừng':'Chạy mã'),elem('kbd','',mac?'⌘ B':'Ctrl B'))
 }
-function finish() { if(task)task.terminate();task=null;runButton(false) }
+function finish() { if(task)task.terminate();task=null;setTerminalRun(null);runButton(false) }
 function stop() { finish();status('Đã dừng');$('elapsed').textContent='' }
 function appendOutput(text,isError=false,isInput=false) {
   const box=$('out-panel'),follow=box.scrollHeight-box.scrollTop-box.clientHeight<36
   const span=elem('span',isError?'stderr':isInput?'echo':'',text);$('output').append(span)
   if(follow)box.scrollTop=box.scrollHeight
 }
-function runOrStop() {
+async function runOrStop() {
   if(task){stop();return}
   resetConsole();$('command').textContent='$ python '+current().name;status('Đang nạp Python…','busy');runButton(true)
   try {
-    const worker=new Worker(new URL('runner.js?v=2',document.baseURI));task=worker
+    const token=crypto.randomUUID()
+    setTerminalRun(token)
+    const preparing={terminate(){}}
+    task=preparing
+    const interactive=$('input-mode').value==='terminal'
+    const owner=interactive ? await terminalClient() : null
+    if(task!==preparing)return
+    const worker=new Worker(new URL('runner.js?v=4',document.baseURI));task=worker
     worker.onmessage=({data})=>{
       if(task!==worker)return
       if(data.type==='packages')status('Đang nạp '+data.names.join(', ')+'…','busy')
@@ -251,16 +263,33 @@ function runOrStop() {
       if(data.type==='failure'){finish();status('Lỗi bộ chạy','error');appendOutput(data.message,true)}
     }
     worker.onerror=e=>{if(task!==worker)return;finish();status('Lỗi bộ chạy','error');appendOutput(e.message||'Không tải được bộ chạy Python. Hãy mở lại trang qua HTTP.',true)}
-    worker.postMessage({name:current().name,code:current().code,stdin:current().stdin||'',files:workspace.files.map(({name,code})=>({name,code}))})
+    worker.postMessage({token,owner,interactive,name:current().name,code:current().code,stdin:current().stdin||'',requirements:workspace.requirements,files:workspace.files.map(({name,code})=>({name,code}))})
   } catch(err){finish();status('Lỗi bộ chạy','error');appendOutput(err.message,true)}
 }
 $('run').onclick=runOrStop
+$('packages').onclick=()=>{
+  const body=elem('div','package-settings')
+  body.append(elem('p','','PyLab tự tìm thư viện từ lệnh import. Nếu tên cài đặt khác tên import, hoặc bạn cần một phiên bản cụ thể, hãy khai báo ở đây.'))
+  const label=elem('label','','Gói cần cài · mỗi dòng một gói')
+  const input=elem('textarea')
+  input.value=workspace.requirements;input.spellcheck=false;input.placeholder='python-slugify\nhumanize==4.12.3'
+  label.append(input);body.append(label)
+  body.append(elem('p','','Các gói ngoài bản local cần Internet. Nếu gói yêu cầu CPython, hệ điều hành hoặc GPU, hãy xuất notebook và mở bằng Jupyter hoặc Google Colab.'))
+  dialog('Gói Python',body,[['export','Xuất notebook','secondary'],['ok','Lưu','primary']],async action=>{
+    if(action==='export'){
+      try {const {exportNotebook}=await import('./notebook.js');await exportNotebook(workspace.files,current(),input.value);notify('Đã xuất notebook kèm mã và danh sách gói.')}
+      catch(error){notify(error.message)}
+      return
+    }
+    workspace.requirements=input.value.trim();persist();modal.close();notify('Đã lưu danh sách gói cho lần chạy tiếp theo.')
+  })
+}
 $('help').onclick=()=>{
   closeMenu()
   const list=elem('dl')
   for(const [title,text] of [
-    ['Chạy chương trình','Bấm Chạy mã hoặc Ctrl + Enter (⌘ + Enter trên Mac). Bấm Dừng để ngắt một vòng lặp.'],
-    ['Nhập dữ liệu','Mở thẻ Đầu vào, điền mỗi giá trị trên một dòng rồi chạy. Python sẽ lần lượt đọc từng dòng bằng input().'],
+    ['Chạy chương trình','Dùng Ctrl+B hoặc Ctrl+Enter để chạy hoặc dừng (⌘ trên Mac). Ctrl+S tải tệp .py.'],
+    ['Nhập dữ liệu','Khi input() chờ, gõ trong Terminal rồi nhấn Enter. Ctrl+D hoặc EOF kết thúc đầu vào. Trong thẻ Đầu vào có thể chọn dùng các dòng soạn sẵn.'],
     ['Làm việc với nhiều tệp','Dấu + tạo tệp mới. Đặt hàm trong cong_cu.py, rồi dùng from cong_cu import … trong tệp chính. Nút ⋯ bên cạnh tệp cho phép đổi tên và xóa.'],
     ['Giữ bài làm','Web tự lưu theo trình duyệt. Bấm biểu tượng tải xuống hoặc Ctrl + S để lấy tệp .py. Xóa dữ liệu trình duyệt cũng xóa bài đã lưu.'],
     ['Di chuyển bằng bàn phím','Trong vùng mã, Tab thụt lề. Bấm Esc rồi Tab để chuyển đến điều khiển kế tiếp.']
@@ -268,13 +297,14 @@ $('help').onclick=()=>{
   dialog('Hướng dẫn sử dụng',list,[['cancel','Đã hiểu','primary']],null)
 }
 document.addEventListener('keydown',e=>{
-  if(modal.open)return
+  if(document.querySelector('dialog[open]'))return
+  if(view==='studio' && e.shiftKey && e.key==='F5'){e.preventDefault();if(task)stop();return}
   if(e.key==='Escape'){closeMenu();if(document.body.classList.contains('focus-mode'))setFocusMode(false)}
   if(view!=='studio'||(!e.ctrlKey&&!e.metaKey)||e.defaultPrevented)return
-  if(e.key==='Enter'){e.preventDefault();runOrStop()}
+  if(e.key==='Enter'||e.key.toLowerCase()==='b'){e.preventDefault();if(!e.repeat)runOrStop()}
   if(e.key.toLowerCase()==='s'){e.preventDefault();persist();download()}
 })
 showFiles();$('stdin').value=current().stdin||'';tab(false);route();runButton(false)
 persist()
 // Only the shipped starter is run automatically. Returning work stays editable until Run.
-if(view==='studio' && current().id==='main' && current().code===starter.code && workspace.files.length===1)runOrStop()
+if(view==='studio' && current().id==='main' && current().code===starter.code && workspace.files.length===1 && !workspace.requirements.trim())runOrStop()
