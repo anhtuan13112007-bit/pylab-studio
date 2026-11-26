@@ -21,7 +21,16 @@ self.onmessage = async ({data}) => {
   try {
     const indexURL = new URL('./runtime/', self.location.href).href
     importScripts(indexURL + 'pyodide.js')
-    runtime = await loadPyodide({indexURL})
+    runtime = await loadPyodide({indexURL, env:{MPLBACKEND:'module://_pylab_matplotlib_backend'}})
+    const sitePackages = runtime.runPython("import sysconfig; sysconfig.get_path('purelib')")
+    runtime.FS.writeFile(sitePackages + '/_pylab_matplotlib_backend.py', data.plotBackend, {encoding:'utf8'})
+    runtime.registerJsModule('_pylab_display', {
+      send_png(id, number, title, bytes) {
+        flush()
+        const png = new Blob([bytes.toJs()], {type:'image/png'})
+        self.postMessage({type:'plot', id, number, title, png})
+      }
+    })
     for (const [setter, kind] of [['setStdout','out'],['setStderr','err']]) {
       const decoder = new TextDecoder()
       runtime[setter]({write(bytes){append(kind,decoder.decode(bytes,{stream:true}));return bytes.length}})

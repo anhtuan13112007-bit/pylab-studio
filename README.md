@@ -151,11 +151,11 @@ $('copy-code').onclick = async () => {
 }
 ```
 
-**Thay đổi bộ chạy.** Giao diện gửi tên tệp, mã, stdin và bản chụp các tệp tới `public/runner.js`. Worker phát các thông điệp `packages`, `running`, `text`, `done` hoặc `failure`. Nút Dừng kết thúc worker. Nếu thêm loại kết quả mới, ví dụ một hình vẽ, cần bổ sung cả bên phát trong worker lẫn bên hiển thị trong `src/main.js`.
+**Thay đổi bộ chạy.** Giao diện gửi tên tệp, mã, stdin và bản chụp các tệp tới `public/runner.js`. Worker phát các thông điệp `packages`, `running`, `text`, `done` hoặc `failure`. Nút Dừng kết thúc worker. Khi mã gọi `plt.show()`, backend Matplotlib trong `src/matplotlib-backend.py` vẽ ảnh PNG trong worker. Thông điệp `plot` chuyển ảnh tới `src/plots.js` để hiển thị ngay trong Terminal. Nhấn vào hình để phóng to hoặc tải ảnh PNG. Bản hiện tại hiển thị đồ thị tĩnh.
 
 ### Import thư viện
 
-**Gói đi kèm.** Bản local có pandas 2.2.3, SciPy 1.14.1, NumPy 2.0.2, SymPy 1.13.3, mpmath 1.3.0, micropip và các phụ thuộc tương ứng. Bạn có thể chạy các bài dùng chúng khi ngắt Internet. Khi truy cập web công khai, trình duyệt tải những tệp cần thiết từ GitHub Pages.
+**Gói đi kèm.** Bản local có Matplotlib 3.8.4, pandas 2.2.3, SciPy 1.14.1, NumPy 2.0.2, SymPy 1.13.3, mpmath 1.3.0, micropip và các phụ thuộc tương ứng. Bạn có thể chạy các bài dùng chúng khi ngắt Internet. Khi truy cập web công khai, trình duyệt tải những tệp cần thiết từ GitHub Pages.
 
 **Tự tìm gói.** Bấm **Chạy mã** sau khi viết `import` hoặc `from … import …`. PyLab đọc các lệnh import trong bài và trong các tệp Python mà bài đó sử dụng. Bộ nạp ưu tiên mô-đun có sẵn, tra danh mục Pyodide của bản phát hành, rồi thử tên mô-đun trên PyPI qua micropip. Các gói tải qua mạng cần kết nối tới jsDelivr, PyPI hoặc máy chủ tệp của PyPI. Chỉ tên gói và thông tin cần tải được gửi đến kho gói.
 

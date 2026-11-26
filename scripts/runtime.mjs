@@ -16,7 +16,7 @@ function include(name) {
   bundled.add(name)
   for (const dependency of lock.packages[name].depends) include(dependency)
 }
-for (const name of ['sympy', 'numpy', 'pandas', 'scipy', 'micropip']) include(name)
+for (const name of ['sympy', 'numpy', 'pandas', 'scipy', 'matplotlib', 'micropip']) include(name)
 
 function matches(bytes, entry) {
   return createHash('sha256').update(bytes).digest('hex') === entry.sha256

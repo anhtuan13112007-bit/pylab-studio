@@ -1,4 +1,6 @@
 import './style.css'
+import plotBackend from './matplotlib-backend.py?raw'
+import { displayPlot, clearPlots } from './plots.js'
 import './editor-colors.css'
 import { createEditor } from './editor.js'
 import { starter, examples } from './examples.js'
@@ -224,9 +226,9 @@ $('stdin').oninput=()=>{current().stdin=$('stdin').value;current().inputMode='ba
 handleReads(()=>{tab(false);status('Chờ nhập dữ liệu…','busy')},()=>status('Đang chạy…','busy'))
 function status(text,type='') { $('run-state').replaceChildren(elem('span','dot '+type),document.createTextNode(text)) }
 function resetConsole() {
-  $('output').replaceChildren();$('command').textContent='';$('elapsed').textContent='';tab(false);status('Sẵn sàng')
+  clearPlots();$('output').replaceChildren();$('command').textContent='';$('elapsed').textContent='';tab(false);status('Sẵn sàng')
 }
-$('clear').onclick=()=>{ $('output').replaceChildren();$('command').textContent='';if(!task){$('elapsed').textContent='';status('Đã xóa kết quả')} }
+$('clear').onclick=()=>{ clearPlots();$('output').replaceChildren();$('command').textContent='';if(!task){$('elapsed').textContent='';status('Đã xóa kết quả')} }
 function runButton(busy) {
   $('run').classList.toggle('running',busy)
   const mac=/Mac|iPhone|iPad/.test(navigator.platform)
@@ -250,12 +252,13 @@ async function runOrStop() {
     const interactive=$('input-mode').value==='terminal'
     const owner=interactive ? await terminalClient() : null
     if(task!==preparing)return
-    const worker=new Worker(new URL('runner.js?v=4',document.baseURI));task=worker
+    const worker=new Worker(new URL('runner.js?v=5',document.baseURI));task=worker
     worker.onmessage=({data})=>{
       if(task!==worker)return
       if(data.type==='packages')status('Đang nạp '+data.names.join(', ')+'…','busy')
       if(data.type==='running')status('Đang chạy…','busy')
       if(data.type==='text')appendOutput(data.text,data.stream==='err',data.stream==='input')
+      if(data.type==='plot')displayPlot(data,$('output'),$('out-panel'))
       if(data.type==='done'){
         finish();status(data.ok?'Hoàn tất':'Có lỗi',data.ok?'':'error')
         $('elapsed').textContent=new Intl.NumberFormat('vi-VN',{maximumFractionDigits:2}).format(data.ms/1000)+' s'
@@ -263,7 +266,7 @@ async function runOrStop() {
       if(data.type==='failure'){finish();status('Lỗi bộ chạy','error');appendOutput(data.message,true)}
     }
     worker.onerror=e=>{if(task!==worker)return;finish();status('Lỗi bộ chạy','error');appendOutput(e.message||'Không tải được bộ chạy Python. Hãy mở lại trang qua HTTP.',true)}
-    worker.postMessage({token,owner,interactive,name:current().name,code:current().code,stdin:current().stdin||'',requirements:workspace.requirements,files:workspace.files.map(({name,code})=>({name,code}))})
+    worker.postMessage({token,owner,interactive,plotBackend,name:current().name,code:current().code,stdin:current().stdin||'',requirements:workspace.requirements,files:workspace.files.map(({name,code})=>({name,code}))})
   } catch(err){finish();status('Lỗi bộ chạy','error');appendOutput(err.message,true)}
 }
 $('run').onclick=runOrStop

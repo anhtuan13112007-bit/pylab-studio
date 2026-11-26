@@ -57,7 +57,7 @@
                 <button class="term-tab active" id="output-tab" role="tab" aria-selected="true" aria-controls="out-panel"><i data-i="terminal"></i>Terminal</button>
                 <button class="term-tab" id="stdin-tab" role="tab" aria-selected="false" aria-controls="in-panel">Đầu vào</button>
               </div><button class="icon" id="clear" title="Xóa kết quả" aria-label="Xóa kết quả"><i data-i="trash-2"></i></button></div>
-              <div id="out-panel" role="tabpanel" aria-labelledby="output-tab" class="out-panel"><div id="command" class="command"></div><pre id="output"></pre><form id="terminal-form" class="terminal-prompt" hidden><span aria-hidden="true">›</span><input id="terminal-line" aria-label="Nhập trực tiếp trong Terminal" autocomplete="off" placeholder="Nhập rồi nhấn Enter"><button type="submit" title="Gửi dòng">Gửi</button><button type="button" id="terminal-eof" title="Kết thúc đầu vào (Ctrl+D)">EOF</button></form></div>
+              <div id="out-panel" role="tabpanel" aria-labelledby="output-tab" class="out-panel"><div id="command" class="command"></div><div id="output"></div><form id="terminal-form" class="terminal-prompt" hidden><span aria-hidden="true">›</span><input id="terminal-line" aria-label="Nhập trực tiếp trong Terminal" autocomplete="off" placeholder="Nhập rồi nhấn Enter"><button type="submit" title="Gửi dòng">Gửi</button><button type="button" id="terminal-eof" title="Kết thúc đầu vào (Ctrl+D)">EOF</button></form></div>
               <div id="in-panel" role="tabpanel" aria-labelledby="stdin-tab" class="in-panel" hidden><label for="input-mode">Nguồn nhập liệu</label><select id="input-mode"><option value="terminal">Nhập ngay trong Terminal</option><option value="batch">Dùng các dòng nhập sẵn</option></select><label for="stdin">Dữ liệu nhập sẵn</label><textarea id="stdin" spellcheck="false" placeholder="Ví dụ: An"></textarea></div>
               <div class="term-foot"><span id="run-state" role="status"><span class="dot"></span>Sẵn sàng</span><span id="elapsed"></span></div>
             </section>
@@ -72,6 +72,7 @@
     </main>
   </div>
   <dialog id="modal"><form method="dialog" class="dialog-box"><div class="dialog-head"><h2 id="modal-title"></h2><button class="icon" value="cancel" aria-label="Đóng" formnovalidate><i data-i="x"></i></button></div><div id="modal-body"></div><div class="dialog-actions" id="modal-actions"></div></form></dialog>
+  <dialog id="plot-dialog" aria-labelledby="plot-title"><div class="plot-view"><div class="dialog-head"><h2 id="plot-title">Đồ thị</h2><form method="dialog"><button class="icon" aria-label="Đóng đồ thị"><i data-i="x"></i></button></form></div><img id="plot-preview" alt=""><a id="plot-download" class="secondary" download>Tải ảnh PNG</a></div></dialog>
   <dialog id="appearance-dialog" aria-labelledby="appearance-title"><form id="appearance-form" class="dialog-box">
     <div class="dialog-head"><h2 id="appearance-title">Tùy chỉnh hình nền</h2><button type="button" id="appearance-close" class="icon" aria-label="Đóng tùy chỉnh"><i data-i="x"></i></button></div>
     <div class="appearance-preview hero" aria-label="Xem trước banner"><div class="hero-photo"></div><canvas id="preview-art" aria-hidden="true"></canvas><strong>Python Studio</strong></div>
