@@ -1,0 +1,25 @@
+{
+  "name": "pylab-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/runtime.mjs && vite --host 127.0.0.1",
+    "build": "node scripts/runtime.mjs && vite build",
+    "start": "node scripts/serve.mjs"
+  },
+  "dependencies": {
+    "codemirror": "6.0.2",
+    "@codemirror/lang-python": "6.2.1",
+    "@codemirror/language": "^6.11.0",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.37.0",
+    "@codemirror/commands": "^6.8.1",
+    "@lezer/highlight": "^1.2.1",
+    "pyodide": "0.27.7",
+    "lucide": "npm:lucide-static@0.468.0"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  }
+}

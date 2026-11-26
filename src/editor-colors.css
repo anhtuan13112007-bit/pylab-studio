@@ -1,0 +1,6 @@
+/* Python syntax colors follow the application theme. */
+:root{--tok-keyword:#893b80;--tok-string:#26704a;--tok-number:#986026;--tok-function:#285d91;--tok-comment:#69766b}
+:root[data-theme=dark]{--tok-keyword:#dfa1da;--tok-string:#a4d3a2;--tok-number:#ecc695;--tok-function:#a4c6ec;--tok-comment:#a5b2a3}
+.file-row{display:flex;align-items:center;min-width:0;gap:2px}.file-row .file-link{flex:1;min-width:0}
+.file-options{flex:none;opacity:.5}.file-row:hover .file-options,.file-options:focus-visible{opacity:1}
+@media(pointer:coarse){.file-options{opacity:1}}
