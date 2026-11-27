@@ -6,6 +6,7 @@ import icon4 from 'lucide/icons/circle-help.svg?raw'
 import icon5 from 'lucide/icons/laptop.svg?raw'
 import left from 'lucide/icons/chevron-left.svg?raw'
 import right from 'lucide/icons/chevron-right.svg?raw'
+import up from 'lucide/icons/chevron-up.svg?raw'
 import picture from 'lucide/icons/image.svg?raw'
 import pause from 'lucide/icons/pause.svg?raw'
 import icon8 from 'lucide/icons/hard-drive.svg?raw'
@@ -44,6 +45,7 @@ const images = {
   'laptop': icon5,
   'chevron-left': left,
   'chevron-right': right,
+  'chevron-up': up,
   image: picture,
   pause,
   'hard-drive': icon8,

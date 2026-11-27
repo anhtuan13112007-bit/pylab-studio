@@ -68,6 +68,24 @@ $('theme').onclick=()=> {
 }
 
 const desktop = matchMedia('(min-width:931px)')
+const topbarToggle = $('topbar-toggle')
+const topbarKey = 'pylab.topbar.collapsed'
+function setTopbarCollapsed(hidden) {
+  document.body.classList.toggle('topbar-collapsed',hidden)
+  $('topbar-content').inert=hidden
+  topbarToggle.setAttribute('aria-expanded',String(!hidden))
+  const label=hidden?'Mở thanh trên':'Thu thanh trên'
+  topbarToggle.title=label
+  topbarToggle.setAttribute('aria-label',label)
+  editor.measure()
+}
+try {setTopbarCollapsed(localStorage.getItem(topbarKey)==='true')} catch {}
+topbarToggle.onclick=()=>{
+  const hidden=topbarToggle.getAttribute('aria-expanded')==='true'
+  setTopbarCollapsed(hidden)
+  try {localStorage.setItem(topbarKey,String(hidden))} catch {}
+}
+
 let collapsed = false
 let mobileOpen = false
 try { collapsed = localStorage.getItem('pylab.sidebar.collapsed') === 'true' } catch {}

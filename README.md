@@ -31,6 +31,7 @@ Mở địa chỉ máy chủ in ra, mặc định là `http://127.0.0.1:4173`. M
 
 | Khu vực | Bạn có thể làm gì |
 | --- | --- |
+| Thanh trên | Bấm mũi tên **⌃** ở góc phải để thu thanh có nút **Hình nền** lên trên. Bấm mũi tên **⌄** ở mép trên để mở lại. Nút dùng được bằng chuột, cảm ứng hoặc phím Tab rồi Enter. Trình duyệt nhớ lựa chọn sau khi tải lại, riêng cho bản local và GitHub Pages. |
 | Thanh bên | Mũi tên trên thanh trên cùng thu hoặc mở thanh PyLab. Chuyển giữa trình soạn thảo và thư viện. Dấu `+` tạo tệp. Nút `⋯` đổi tên hoặc xóa tệp sau khi xác nhận. Nhập mã UTF-8 từ tệp `.py` tối đa 1 MB. Tệp nhập trùng tên nhận hậu tố. |
 | Trình soạn thảo | Tô màu cú pháp, đánh số dòng, thụt lề 4 dấu cách, đánh dấu cặp ngoặc, gấp khối, tìm trong mã và hoàn tác. Thanh dưới hiển thị vị trí con trỏ. |
 | Bàn làm việc | Chạy tệp đang mở, dừng ngay cả khi mã lặp vô hạn, tải tệp hiện tại hoặc mở rộng vùng làm việc. Mỗi lần chạy dùng một môi trường Python mới. |
