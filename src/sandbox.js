@@ -6,7 +6,7 @@ let setup
 
 async function readAsset(path) {
   const response = await fetch(local(path), {credentials:'omit', redirect:'error', referrerPolicy:'no-referrer'})
-  if (!response.ok) throw Error('Không đọc được thành phần PyLab: ' + path)
+  if (!response.ok) throw Error('Không đọc được thành phần AT Python: ' + path)
   return response.text()
 }
 async function loadSetup() {

@@ -7,6 +7,8 @@ import { starter, examples } from './examples.js'
 import { readWorkspace, writeWorkspace, validName, availableName } from './storage.js'
 import { icon, renderIcons } from './icons.js'
 import { setupAppearance } from './appearance.js'
+import { setupPaneSizing } from './pane-sizing.js'
+import './pointer-effects.js'
 // The notebook exporter is loaded when a notebook is requested.
 import { closeInput, requestInput } from './terminal.js'
 import { filesForRun, checkPackages } from './run-permissions.js'
@@ -32,6 +34,7 @@ const editor = createEditor($('editor'), current().code, code => {
   current().code = code; scheduleSave()
 }, (line,col) => { $('cursor').textContent = 'Dòng '+line+', cột '+col }, runOrStop)
 setupAppearance(notify)
+setupPaneSizing()
 
 function notify(message) {
   clearTimeout(toastTimer); $('toast').textContent=message; $('toast').hidden=false
@@ -98,7 +101,7 @@ function syncSidebar() {
   $('sidebar').inert = !open
   $('scrim').hidden = desktop.matches || !open
   const button = $('menu')
-  const label = open ? 'Thu thanh PyLab' : 'Mở thanh PyLab'
+  const label = open ? 'Thu thanh AT Python' : 'Mở thanh AT Python'
   button.title = label
   button.setAttribute('aria-label',label)
   button.setAttribute('aria-expanded',String(open))
@@ -134,7 +137,7 @@ function route() {
   view=location.hash==='#library'?'library':'studio'
   $('studio-page').hidden=view!=='studio';$('library-page').hidden=view!=='library'
   $('crumb-page').textContent=view==='studio'?'Trình soạn thảo':'Thư viện mẫu'
-  document.title=$('crumb-page').textContent+' · PyLab'
+  document.title=$('crumb-page').textContent+' · AT Python'
   for (const btn of all('nav [data-route]')) {
     btn.classList.toggle('selected',btn.dataset.route===view)
     if(btn.dataset.route===view)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current')
@@ -357,7 +360,7 @@ $('packages').onclick=()=>{
     choices.push([file.id,toggle(file.name,access.sharedIds.includes(file.id))])
   }
   const online=toggle('Cho phép bài này tải gói qua Internet trong phiên này',access.online)
-  body.append(elem('p','','Mặc định dùng gói đi kèm. Khi bật mạng, mã và thư viện trong bài có thể kết nối tới PyPI và kho tệp PyPI. PyLab tải các gói Pyodide đã khóa từ jsDelivr.'))
+  body.append(elem('p','','Mặc định dùng gói đi kèm. Khi bật mạng, mã và thư viện trong bài có thể kết nối tới PyPI và kho tệp PyPI. AT Python tải các gói Pyodide đã khóa từ jsDelivr.'))
   const label=elem('label','','Gói PyPI cho phép cài · mỗi dòng một gói')
   const input=elem('textarea')
   input.value=access.requirements ?? workspace.requirements;input.spellcheck=false;input.placeholder='python-slugify\nhumanize==4.12.3'
@@ -380,6 +383,7 @@ $('help').onclick=()=>{
   const list=elem('dl')
   for(const [title,text] of [
     ['Chạy chương trình','Dùng Ctrl+B hoặc Ctrl+Enter để chạy hoặc dừng (⌘ trên Mac). Ctrl+S tải tệp .py.'],
+    ['Kích thước hai khung','Kéo góc có vạch chéo dưới mỗi khung, hoặc bấm vào góc đó để chỉnh chiều rộng và chiều cao. Khi hai khung nằm cạnh nhau, chúng chia sẻ chiều rộng. Chọn Mặc định trong hộp kích thước để đặt lại.'],
     ['Nhập dữ liệu','Khi input() chờ, gõ trong Terminal rồi nhấn Enter. Ctrl+D hoặc EOF kết thúc đầu vào. Trong thẻ Đầu vào có thể chọn dùng các dòng soạn sẵn.'],
     ['Làm việc với nhiều tệp','Dấu + tạo tệp mới. Trong tệp chính, chọn mô-đun cần dùng ở Gói và tệp rồi dùng import. Nút ⋯ bên cạnh tệp cho phép đổi tên và xóa.'],
     ['Giữ bài làm','Web tự lưu theo trình duyệt. Bấm biểu tượng tải xuống hoặc Ctrl + S để lấy tệp .py. Xóa dữ liệu trình duyệt cũng xóa bài đã lưu.'],

@@ -42,7 +42,7 @@ server.on('error', err => {
 })
 server.once('listening', () => {
   const url = 'http://127.0.0.1:' + server.address().port
-  console.log('PyLab: ' + url + '   |   Ctrl+C để đóng.')
+  console.log('AT Python: ' + url + '   |   Ctrl+C để đóng.')
   if (process.argv.includes('--open') && process.platform === 'win32') {
     spawn('rundll32.exe', ['url.dll,FileProtocolHandler', url], { detached: true, stdio: 'ignore' }).unref()
   }

@@ -1,6 +1,6 @@
 export const starter = {
   name: 'main.py',
-  code: `# Chào mừng bạn đến với PyLab!
+  code: `# Chào mừng bạn đến với AT Python!
 def chao_ban(ten):
     return f"Xin chào, {ten}!"
 

@@ -1,14 +1,14 @@
-# PyLab · Phòng thực hành Python
+# AT Python · Phòng thực hành Python
 
 Viết mã Python bằng tiếng Việt, chạy ngay trong trình duyệt và giữ bài làm trên thiết bị. Bản phát hành dùng CPython 3.12.7 qua Pyodide 0.27.7. Cả trình soạn thảo, biểu tượng và bộ chạy Python đều nằm trong bản web.
 
-**[Mở PyLab](https://anhtuan13112007-bit.github.io/pylab-studio/)** · **[Mã nguồn](https://github.com/anhtuan13112007-bit/pylab-studio)**
+**[Mở AT Python](https://anhtuan13112007-bit.github.io/pylab-studio/)** · **[Mã nguồn](https://github.com/anhtuan13112007-bit/pylab-studio)**
 
 ## 1. Mở bản local
 
-Trên máy Windows đã có bản dựng, nhấp đúp **`Mo-PyLab.cmd`** ở thư mục gốc của dự án. Tệp này dùng Node.js để phục vụ thư mục `docs` và mở trình duyệt. Giữ cửa sổ máy chủ trong lúc học, nhấn `Ctrl+C` khi muốn đóng. Bạn có thể ngắt Internet sau khi đã có bản dựng trên máy.
+Trên máy Windows đã có bản dựng, nhấp đúp **`Mo-AT-Python.cmd`** ở thư mục gốc của dự án. Tệp này dùng Node.js để phục vụ thư mục `docs` và mở trình duyệt. Giữ cửa sổ máy chủ trong lúc học, nhấn `Ctrl+C` khi muốn đóng. Bạn có thể ngắt Internet sau khi đã có bản dựng trên máy.
 
-Kho GitHub đã bao gồm bản dựng trong `docs`. Sau khi tải về và giải nén, bạn có thể mở ngay bằng `Mo-PyLab.cmd` trên máy có Node.js. Để dựng lại từ mã nguồn, cài **Node.js 22.12 trở lên** rồi mở Terminal trong thư mục có `package.json`. Chạy lần lượt:
+Kho GitHub đã bao gồm bản dựng trong `docs`. Sau khi tải về và giải nén, bạn có thể mở ngay bằng `Mo-AT-Python.cmd` trên máy có Node.js. Để dựng lại từ mã nguồn, cài **Node.js 22.12 trở lên** rồi mở Terminal trong thư mục có `package.json`. Chạy lần lượt:
 
 ```sh
 npm ci
@@ -18,7 +18,7 @@ npm start
 
 Mở địa chỉ máy chủ in ra, mặc định là `http://127.0.0.1:4173`. Máy chủ chỉ nghe trên thiết bị của bạn. Nếu cổng này đang bận, chương trình in một địa chỉ có cổng khác. Trình duyệt lưu bài riêng cho từng địa chỉ và cổng. Hãy quay lại đúng địa chỉ cũ để tiếp tục bài.
 
-**Khi chỉnh sửa web**, chạy `npm run dev` sau `npm ci`, rồi mở địa chỉ Vite in ra. Thay đổi giao diện sẽ hiện khi bạn lưu tệp. Sau khi chỉnh xong, chạy `npm run build` để cập nhật bản mở bằng `Mo-PyLab.cmd`. Trang cần được mở qua HTTP hoặc HTTPS để tải JavaScript module, Web Worker và WebAssembly.
+**Khi chỉnh sửa web**, chạy `npm run dev` sau `npm ci`, rồi mở địa chỉ Vite in ra. Thay đổi giao diện sẽ hiện khi bạn lưu tệp. Sau khi chỉnh xong, chạy `npm run build` để cập nhật bản mở bằng `Mo-AT-Python.cmd`. Trang cần được mở qua HTTP hoặc HTTPS để tải JavaScript module, Web Worker và WebAssembly.
 
 ## 2. Bài thực hành đầu tiên
 
@@ -32,7 +32,7 @@ Mở địa chỉ máy chủ in ra, mặc định là `http://127.0.0.1:4173`. M
 | Khu vực | Bạn có thể làm gì |
 | --- | --- |
 | Thanh trên | Bấm mũi tên **⌃** ở góc phải để thu thanh có nút **Hình nền** lên trên. Bấm mũi tên **⌄** ở mép trên để mở lại. Nút dùng được bằng chuột, cảm ứng hoặc phím Tab rồi Enter. Trình duyệt nhớ lựa chọn sau khi tải lại, riêng cho bản local và GitHub Pages. |
-| Thanh bên | Mũi tên trên thanh trên cùng thu hoặc mở thanh PyLab. Chuyển giữa trình soạn thảo và thư viện. Dấu `+` tạo tệp. Nút `⋯` đổi tên hoặc xóa tệp sau khi xác nhận. Nhập mã UTF-8 từ tệp `.py` tối đa 1 MB. Tệp nhập trùng tên nhận hậu tố. |
+| Thanh bên | Mũi tên trên thanh trên cùng thu hoặc mở thanh AT Python. Chuyển giữa trình soạn thảo và thư viện. Dấu `+` tạo tệp. Nút `⋯` đổi tên hoặc xóa tệp sau khi xác nhận. Nhập mã UTF-8 từ tệp `.py` tối đa 1 MB. Tệp nhập trùng tên nhận hậu tố. |
 | Trình soạn thảo | Tô màu cú pháp, đánh số dòng, thụt lề 4 dấu cách, đánh dấu cặp ngoặc, gấp khối, tìm trong mã và hoàn tác. Thanh dưới hiển thị vị trí con trỏ. |
 | Bàn làm việc | Chạy tệp đang mở, dừng ngay cả khi mã lặp vô hạn, tải tệp hiện tại hoặc mở rộng vùng làm việc. Mỗi lần chạy dùng một môi trường Python mới. |
 | Terminal | Xem lệnh chạy, kết quả, lỗi và thời gian thực thi sau khi nạp Python. Traceback hiển thị tên tệp và số dòng. Nút thùng rác xóa phần hiển thị. Đầu ra giới hạn 65.536 ký tự để bảo vệ độ phản hồi. |
@@ -43,6 +43,10 @@ Mở địa chỉ máy chủ in ra, mặc định là `http://127.0.0.1:4173`. M
 | Thiết bị và hiển thị | Bài làm và giao diện sáng/tối được lưu trong trình duyệt. Máy tính hiển thị mã và kết quả cạnh nhau. Điện thoại xếp hai khung theo chiều dọc và thu thanh bên vào nút menu. |
 
 Trang mở đầu tự chạy bài chào mẫu khi không gian chỉ còn tệp mẫu nguyên bản. Các tệp bạn tự viết chạy khi bạn bấm **Chạy mã**. Bài làm trên bản local và bản GitHub Pages có vùng lưu riêng. Dùng tải xuống và nhập tệp để chuyển giữa hai nơi. Bài làm có thể mất khi xóa dữ liệu trang hoặc đóng phiên riêng tư.
+
+Kéo tay nắm có vạch chéo ở chân trình soạn thảo hoặc Terminal để đổi kích thước. Trên máy tính, hai khung chia sẻ chiều rộng và có chiều cao riêng. Khi xếp dọc trên điện thoại, bạn chỉnh được cả hai chiều của từng khung độc lập. Bạn cũng có thể bấm tay nắm (hoặc dùng Tab rồi Enter), chỉnh hai thanh trượt bằng phím mũi tên và chọn **Mặc định** để đặt lại. Trình duyệt nhớ kích thước riêng cho hai kiểu bố cục.
+
+Ở chế độ sáng, video nền hiển thị nguyên màu. Vào **Hình nền** để tùy chỉnh độ trong suốt của từng khung. Các điều khiển có viền neon khi di chuột và phản hồi khi bấm. Hiệu ứng động tuân theo cài đặt giảm chuyển động của thiết bị.
 
 ### Phím tắt
 
@@ -104,7 +108,7 @@ print(binh_phuong(7))
 | `src/notebook.js` | Xuất tệp đang mở, các mô-đun đã chọn, đầu vào của bài và danh sách gói sang notebook Jupyter/Colab. |
 | `public/runner.js` | Khởi tạo Python, chuẩn bị các mô-đun, đọc stdin, truyền kết quả và lỗi về giao diện. |
 | `scripts/runtime.mjs` | Chuẩn bị bộ chạy, các gói toán học và danh sách tên import. Kiểm tra SHA-256 của từng gói theo lockfile của Pyodide. |
-| `scripts/serve.mjs`, `Mo-PyLab.cmd` | Máy chủ local và lối tắt Windows. |
+| `scripts/serve.mjs`, `Mo-AT-Python.cmd` | Máy chủ local và lối tắt Windows. |
 | `vite.config.js`, `package.json`, `package-lock.json` | Đường dẫn tài nguyên tương đối, lệnh dự án và phiên bản thư viện. |
 | `docs/` | Bản web đã dựng, gồm giao diện và bộ chạy Python. Máy chủ local và GitHub Pages đều phục vụ thư mục này. Sửa các tệp nguồn rồi dựng lại để cập nhật. |
 
@@ -158,7 +162,7 @@ $('copy-code').onclick = async () => {
 
 **Gói đi kèm.** Bản local có Matplotlib 3.8.4, pandas 2.2.3, SciPy 1.14.1, NumPy 2.0.2, SymPy 1.13.3, mpmath 1.3.0, micropip và các phụ thuộc tương ứng. Bạn có thể chạy các bài dùng chúng khi ngắt Internet. Khi truy cập web công khai, trình duyệt tải những tệp cần thiết từ GitHub Pages.
 
-**Tự tìm gói.** Bấm **Chạy mã** sau khi viết `import` hoặc `from … import …`. PyLab đọc các lệnh import trong bài và trong các tệp Python mà bài đó sử dụng. Bộ nạp ưu tiên mô-đun có sẵn và tra danh mục Pyodide. Tên import ngoài danh mục sẽ báo để bạn chọn tệp hoặc khai báo gói. Muốn tải gói ngoài bản đóng sẵn, mở **Gói và tệp**, bật quyền Internet cho bài hiện tại và bấm **Lưu**.
+**Tự tìm gói.** Bấm **Chạy mã** sau khi viết `import` hoặc `from … import …`. AT Python đọc các lệnh import trong bài và trong các tệp Python mà bài đó sử dụng. Bộ nạp ưu tiên mô-đun có sẵn và tra danh mục Pyodide. Tên import ngoài danh mục sẽ báo để bạn chọn tệp hoặc khai báo gói. Muốn tải gói ngoài bản đóng sẵn, mở **Gói và tệp**, bật quyền Internet cho bài hiện tại và bấm **Lưu**.
 
 **Tên gói khác tên import.** Trong **Gói và tệp**, điền tên phân phối, mỗi dòng một tên, rồi bấm **Lưu**. Ví dụ khai báo `python-slugify` và viết `from slugify import slugify`. Cũng có thể chọn phiên bản, ví dụ `humanize==4.12.3`. Danh sách gần nhất được lưu để điền lại hộp thoại. Quyền dùng Internet và các tệp được chia sẻ áp dụng riêng cho từng bài trong phiên hiện tại. Tải lại trang sẽ tắt các quyền này. Khai báo rõ tên gói nếu chương trình dùng import động. Với quyền Internet đã bật, cũng có thể dùng `import micropip` và `await micropip.install("tên-gói")`.
 
@@ -172,7 +176,7 @@ print(pd.Series([2, 4, 6]).mean())  # 4.0
 print(det([[1, 2], [3, 4]]))       # xấp xỉ -2
 ```
 
-**Giới hạn trình duyệt.** PyPI cung cấp nhiều bản dựng cho những hệ điều hành và phiên bản Python khác nhau. PyLab chạy được các gói có wheel Python thuần hoặc phù hợp với môi trường WebAssembly và các phụ thuộc của chúng. Thư viện cần driver GPU, tiến trình hệ điều hành, cửa sổ desktop hoặc extension native có thể cần kernel CPython.
+**Giới hạn trình duyệt.** PyPI cung cấp nhiều bản dựng cho những hệ điều hành và phiên bản Python khác nhau. AT Python chạy được các gói có wheel Python thuần hoặc phù hợp với môi trường WebAssembly và các phụ thuộc của chúng. Thư viện cần driver GPU, tiến trình hệ điều hành, cửa sổ desktop hoặc extension native có thể cần kernel CPython.
 
 **Chạy bằng Jupyter hoặc Google Colab.** Trong **Gói và tệp → Xuất notebook**, tải tệp `.ipynb` rồi mở bằng Jupyter trên máy hoặc tải vào Colab. Các ô mã khôi phục các tệp đã chọn vào một thư mục tạm, liệt kê thư viện cần thiết rồi chạy bài với đầu vào đã chọn. Mặc định `allow_pip = False`. Chỉ đổi thành `True` sau khi xem danh sách gói. Notebook chạy với quyền của kernel trên máy hoặc Colab. Chọn kernel có phiên bản Python, hệ điều hành và phần cứng phù hợp. Việc xuất notebook diễn ra trên thiết bị của bạn.
 
@@ -193,13 +197,13 @@ Với NumPy, dùng `import numpy as np` rồi gọi `np.array([1, 2, 3, 4])`. T�
 
 ### Quyền của một lần chạy
 
-Ảnh nền JPG, PNG và WebP được kiểm tra định dạng thực, giới hạn 8 MB và 32 triệu điểm ảnh. PyLab vẽ lại ảnh thành JPEG rồi lưu bản thu nhỏ trong trình duyệt. Việc chọn ảnh, xem trước và lưu diễn ra trên thiết bị. Video được phát trực tiếp từ bản sao trên thiết bị, giữ độ phân giải gốc và tắt tiếng. Ảnh toàn trang đã lưu ở bản cũ vẫn được đọc. Hình nền mới và tùy chỉnh được lưu bằng IndexedDB khi trình duyệt hỗ trợ. Đóng hộp thoại sẽ bỏ thay đổi chưa lưu.
+Ảnh nền JPG, PNG và WebP được kiểm tra định dạng thực, giới hạn 8 MB và 32 triệu điểm ảnh. AT Python vẽ lại ảnh thành JPEG rồi lưu bản thu nhỏ trong trình duyệt. Việc chọn ảnh, xem trước và lưu diễn ra trên thiết bị. Video được phát trực tiếp từ bản sao trên thiết bị, giữ độ phân giải gốc và tắt tiếng. Ảnh toàn trang đã lưu ở bản cũ vẫn được đọc. Hình nền mới và tùy chỉnh được lưu bằng IndexedDB khi trình duyệt hỗ trợ. Đóng hộp thoại sẽ bỏ thay đổi chưa lưu.
 
 Mỗi lần bấm **Chạy mã**, trang tạo một iframe sandbox chỉ có quyền chạy script. Web Worker của Python có origin riêng dạng opaque. Trang soạn thảo gửi bản sao các tệp được chọn và chỉ chuyển dòng nhập khi Terminal yêu cầu. Lớp trung gian chỉ phục vụ tài nguyên có trong bản phát hành. Các gói Pyodide được kiểm tra SHA-256 theo lockfile.
 
 Mặc định Worker có chính sách `connect-src 'none'`. Khi bạn bật quyền Internet trong **Gói và tệp**, mã trong bài và các thư viện của nó có thể kết nối tới PyPI và kho tệp PyPI. Trang soạn thảo chỉ tải các archive Pyodide có tên và hash đã biết từ jsDelivr. Dùng các gói đóng sẵn nếu bài cần xử lý dữ liệu riêng.
 
-Bài làm và đầu vào được lưu trong bộ nhớ trang của hồ sơ trình duyệt. Trên GitHub Pages, các dự án dưới cùng giao thức và hostname dùng chung origin. Hãy giữ mật khẩu và token GitHub ngoài bài tập và notebook. PyLab không yêu cầu đăng nhập tài khoản GitHub.
+Bài làm và đầu vào được lưu trong bộ nhớ trang của hồ sơ trình duyệt. Trên GitHub Pages, các dự án dưới cùng giao thức và hostname dùng chung origin. Hãy giữ mật khẩu và token GitHub ngoài bài tập và notebook. AT Python không yêu cầu đăng nhập tài khoản GitHub.
 
 Để chạy các kiểm tra quyền với dữ liệu giả, dùng `npm run test:security`. Khi sửa mã khởi động trong `public/sandbox.html`, cập nhật SHA-256 trong thẻ CSP tương ứng và chạy lại bộ kiểm tra.
 

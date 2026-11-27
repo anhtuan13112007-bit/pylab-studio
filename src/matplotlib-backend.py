@@ -1,4 +1,4 @@
-"""Matplotlib backend for static plots rendered in PyLab's Python worker."""
+"""Matplotlib backend for static plots rendered in AT Python's Python worker."""
 from io import BytesIO
 from itertools import count
 

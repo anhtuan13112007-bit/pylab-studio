@@ -72,7 +72,7 @@ export async function exportNotebook(files, entry, requirements) {
   ].join('\n')
   const note = {nbformat:4, nbformat_minor:4,
     metadata:{kernelspec:{display_name:'Python 3',language:'python',name:'python3'}},
-    cells:[{cell_type:'markdown',metadata:{},source:'# Bài thực hành PyLab\nNotebook chứa các tệp đã chọn và đầu vào của bài. Kiểm tra mã trước khi chạy trên máy hoặc Colab. Ô cài gói mặc định tắt pip. Chọn kernel CPython 3.10 trở lên với hệ điều hành và phần cứng phù hợp với thư viện.'},codeCell(setup),codeCell(install),codeCell(run)]}
+    cells:[{cell_type:'markdown',metadata:{},source:'# Bài thực hành AT Python\nNotebook chứa các tệp đã chọn và đầu vào của bài. Kiểm tra mã trước khi chạy trên máy hoặc Colab. Ô cài gói mặc định tắt pip. Chọn kernel CPython 3.10 trở lên với hệ điều hành và phần cứng phù hợp với thư viện.'},codeCell(setup),codeCell(install),codeCell(run)]}
   const url = URL.createObjectURL(new Blob([JSON.stringify(note,null,2)], {type:'application/x-ipynb+json'}))
   const link = document.createElement('a')
   link.href=url; link.download=entry.name.replace(/\.py$/i,'')+'.ipynb'
