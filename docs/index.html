@@ -2,15 +2,18 @@
 <html lang="vi">
 <head>
   <meta charset="utf-8">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; frame-src 'self'; worker-src 'none'; connect-src 'self' https://cdn.jsdelivr.net/pyodide/v0.27.7/full/">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#244f38">
   <meta name="description" content="Không gian viết và chạy Python bằng tiếng Việt, ngay trên trình duyệt.">
   <title>PyLab · Phòng thực hành Python</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <script type="module" crossorigin src="./assets/index-DBh9MHIA.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-DD8GaF6p.css">
+  <script type="module" crossorigin src="./assets/index-HQnJoqrP.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CHwBjy6y.css">
 </head>
 <body>
+  <div id="page-wallpaper" aria-hidden="true" hidden></div>
   <a class="skip" href="#workspace">Đến bàn làm việc</a>
   <aside class="sidebar" id="sidebar" aria-label="Thanh điều hướng">
     <a class="brand" href="#studio" aria-label="PyLab – Trang soạn thảo"><img src="./favicon.svg" width="37" height="37" alt=""><strong>PyLab<span>.</span></strong></a>
@@ -44,7 +47,7 @@
         </section>
         <section id="workspace" tabindex="-1" aria-labelledby="workspace-heading">
           <div class="section-head"><h2 id="workspace-heading">Bàn làm việc</h2>
-            <div class="run-tools"><button class="secondary" id="packages" type="button">Gói Python</button><button class="primary" id="run"><i data-i="play"></i><span>Chạy mã</span><kbd>Ctrl B</kbd></button></div>
+            <div class="run-tools"><button class="secondary" id="packages" type="button">Gói và tệp</button><button class="primary" id="run"><i data-i="play"></i><span>Chạy mã</span><kbd>Ctrl B</kbd></button></div>
           </div>
           <div class="panels">
             <section class="pane editor-pane" aria-label="Trình soạn mã Python">
@@ -78,11 +81,16 @@
   <dialog id="appearance-dialog" aria-labelledby="appearance-title"><form id="appearance-form" class="dialog-box">
     <div class="dialog-head"><h2 id="appearance-title">Tùy chỉnh hình nền</h2><button type="button" id="appearance-close" class="icon" aria-label="Đóng tùy chỉnh"><i data-i="x"></i></button></div>
     <div class="appearance-preview hero" aria-label="Xem trước banner"><div class="hero-photo"></div><canvas id="preview-art" aria-hidden="true"></canvas><strong>Python Studio</strong></div>
-    <div class="appearance-fields"><label>Hình minh họa<select id="art-mode"><option value="terrain">Địa hình</option><option value="wave">Sóng biển</option><option value="stars">Bầu trời sao</option><option value="plain">Màu trơn</option><option value="image">Ảnh của tôi</option></select></label>
+    <div class="appearance-fields"><label>Hình trên banner<select id="art-mode"><option value="terrain">Địa hình</option><option value="wave">Sóng biển</option><option value="stars">Bầu trời sao</option><option value="plain">Màu trơn</option><option value="image">Ảnh của tôi</option></select></label>
     <label id="image-control" hidden>Chọn ảnh trên thiết bị<input id="art-file" type="file" accept="image/jpeg,image/png,image/webp"></label>
     <label>Màu banner<input id="art-color" type="color" value="#193e2b"></label>
     <label>Độ đậm hình <output id="opacity-value"></output><input id="art-opacity" aria-label="Độ đậm hình" type="range" min="0" max="100" step="5"></label>
-    <label>Nền trang<select id="page-palette"><option value="auto">Theo giao diện</option><option value="sky">Xanh trời</option><option value="lavender">Tím nhạt</option><option value="sand">Cát ấm</option></select></label></div>
+    <label>Nền toàn trang<select id="page-palette"><option value="auto">Theo giao diện</option><option value="sky">Xanh trời</option><option value="lavender">Tím nhạt</option><option value="sand">Cát ấm</option><option value="image">Ảnh của tôi</option></select></label>
+    <div id="page-image-control" hidden>
+      <label>Chọn ảnh nền toàn trang<input id="page-photo-file" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="page-photo-help"></label>
+      <small id="page-photo-help">JPG, PNG hoặc WebP, tối đa 8 MB. Ảnh được xử lý và lưu trong trình duyệt này.</small>
+      <div id="page-photo-tools" hidden><img id="page-photo-preview" alt="Xem trước ảnh nền toàn trang"><button id="page-photo-remove" class="secondary" type="button">Gỡ ảnh</button></div>
+    </div></div>
     <p id="appearance-note" role="status"></p><div class="dialog-actions"><button type="button" id="appearance-default" class="secondary">Mặc định</button><button type="submit" class="primary">Lưu giao diện</button></div>
   </form></dialog>
   <div id="toast" role="status" hidden></div>

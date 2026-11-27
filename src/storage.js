@@ -16,8 +16,9 @@ export function writeWorkspace(workspace) {
   catch { return false }
 }
 export function validName(value) {
+  if (typeof value !== 'string') return null
   const base = value.trim().replace(/\.py$/i,'')
-  return base && base.length<=76 && !/[<>:"/\\|?*\u0000-\u001f]/.test(base) && !/[. ]$/.test(base) && !/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(\.|$)/i.test(base) ? base+'.py' : null
+  return base && base.length<=76 && !/[<>:"/\\|?*\u0000-\u001f]/.test(base) && !/[. ]$/.test(base) && !/^(con|prn|aux|nul|conin\$|conout\$|com[1-9¹²³]|lpt[1-9¹²³])(\.|$)/i.test(base) ? base+'.py' : null
 }
 export function availableName(name, files) {
   const taken = new Set(files.map(f=>f.name.toLowerCase()))

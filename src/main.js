@@ -8,7 +8,12 @@ import { readWorkspace, writeWorkspace, validName, availableName } from './stora
 import { icon, renderIcons } from './icons.js'
 import { setupAppearance } from './appearance.js'
 // The notebook exporter is loaded when a notebook is requested.
-import { terminalClient, setTerminalRun, handleReads } from './terminal.js'
+import { closeInput, requestInput } from './terminal.js'
+import { filesForRun, checkPackages } from './run-permissions.js'
+import { startSandbox } from './sandbox.js'
+
+const permissions = new Map()
+const accessFor = id => permissions.get(id) || {sharedIds:[], online:false}
 
 const $ = id => document.getElementById(id)
 const all = selector => [...document.querySelectorAll(selector)]
@@ -223,7 +228,6 @@ for(const id of ['output-tab','stdin-tab']) $(id).onkeydown=e=>{
 }
 $('input-mode').onchange=()=>{current().inputMode=$('input-mode').value;scheduleSave()}
 $('stdin').oninput=()=>{current().stdin=$('stdin').value;current().inputMode='batch';$('input-mode').value='batch';scheduleSave()}
-handleReads(()=>{tab(false);status('Chờ nhập dữ liệu…','busy')},()=>status('Đang chạy…','busy'))
 function status(text,type='') { $('run-state').replaceChildren(elem('span','dot '+type),document.createTextNode(text)) }
 function resetConsole() {
   clearPlots();$('output').replaceChildren();$('command').textContent='';$('elapsed').textContent='';tab(false);status('Sẵn sàng')
@@ -234,7 +238,7 @@ function runButton(busy) {
   const mac=/Mac|iPhone|iPad/.test(navigator.platform)
   $('run').replaceChildren(icon(busy?'square':'play'),elem('span','',busy?'Dừng':'Chạy mã'),elem('kbd','',mac?'⌘ B':'Ctrl B'))
 }
-function finish() { if(task)task.terminate();task=null;setTerminalRun(null);runButton(false) }
+function finish() { if(task)task.terminate();task=null;closeInput();runButton(false) }
 function stop() { finish();status('Đã dừng');$('elapsed').textContent='' }
 function appendOutput(text,isError=false,isInput=false) {
   const box=$('out-panel'),follow=box.scrollHeight-box.scrollTop-box.clientHeight<36
@@ -245,46 +249,83 @@ async function runOrStop() {
   if(task){stop();return}
   resetConsole();$('command').textContent='$ python '+current().name;status('Đang nạp Python…','busy');runButton(true)
   try {
-    const token=crypto.randomUUID()
-    setTerminalRun(token)
-    const preparing={terminate(){}}
-    task=preparing
-    const interactive=$('input-mode').value==='terminal'
-    const owner=interactive ? await terminalClient() : null
-    if(task!==preparing)return
-    const worker=new Worker(new URL('runner.js?v=5',document.baseURI));task=worker
-    worker.onmessage=({data})=>{
+    const entry = current()
+    const access = accessFor(entry.id)
+    const interactive = $('input-mode').value==='terminal'
+    const job = {
+      files:filesForRun(workspace.files,entry,access.sharedIds), name:entry.name, code:entry.code,
+      interactive, stdin:interactive ? '' : entry.stdin || '', plotBackend,
+      online:access.online, requirements:access.online ? checkPackages(access.requirements).join('\n') : ''
+    }
+    let characters=0, events=0, images=0, imageBytes=0
+    const fail = message => {
+      if (task !== worker) return
+      finish();status('Lỗi bộ chạy','error');appendOutput(String(message).slice(0,1600),true)
+    }
+    const worker=startSandbox(job, data=>{
       if(task!==worker)return
-      if(data.type==='packages')status('Đang nạp '+data.names.join(', ')+'…','busy')
+      if (++events > 10000) {fail('Đã dừng sau quá nhiều thông báo.');return}
+      if(data.type==='packages' && typeof data.name==='string')status('Đang nạp '+data.name.slice(0,180)+'…','busy')
+      if(data.type==='stdin' && job.interactive) {
+        tab(false);status('Chờ nhập dữ liệu…','busy')
+        requestInput(value=>{worker.answer(value);status('Đang chạy…','busy')})
+      }
       if(data.type==='running')status('Đang chạy…','busy')
-      if(data.type==='text')appendOutput(data.text,data.stream==='err',data.stream==='input')
-      if(data.type==='plot')displayPlot(data,$('output'),$('out-panel'))
-      if(data.type==='done'){
+      if(data.type==='text' && typeof data.text==='string' && characters<65580) {
+        const part=data.text.slice(0,65580-characters)
+        characters+=part.length;appendOutput(part,data.stream==='err',data.stream==='input')
+      }
+      if(data.type==='plot') {
+        if (!(data.png instanceof Blob) || data.png.type!=='image/png' || typeof data.title!=='string'
+          || !Number.isSafeInteger(data.id) || !Number.isSafeInteger(data.number)) return
+        imageBytes+=data.png.size
+        if (++images>48 || data.png.size>8*1024*1024 || imageBytes>32*1024*1024) {
+          fail('Đã dừng sau khi đạt giới hạn ảnh của lần chạy.');return
+        }
+        displayPlot({...data,title:data.title.slice(0,240)},$('output'),$('out-panel'))
+      }
+      if(data.type==='done' && Number.isFinite(data.ms) && typeof data.ok==='boolean'){
         finish();status(data.ok?'Hoàn tất':'Có lỗi',data.ok?'':'error')
         $('elapsed').textContent=new Intl.NumberFormat('vi-VN',{maximumFractionDigits:2}).format(data.ms/1000)+' s'
       }
-      if(data.type==='failure'){finish();status('Lỗi bộ chạy','error');appendOutput(data.message,true)}
-    }
-    worker.onerror=e=>{if(task!==worker)return;finish();status('Lỗi bộ chạy','error');appendOutput(e.message||'Không tải được bộ chạy Python. Hãy mở lại trang qua HTTP.',true)}
-    worker.postMessage({token,owner,interactive,plotBackend,name:current().name,code:current().code,stdin:current().stdin||'',requirements:workspace.requirements,files:workspace.files.map(({name,code})=>({name,code}))})
+      if(data.type==='failure' && typeof data.message==='string')fail(data.message)
+    }, fail)
+    task=worker
   } catch(err){finish();status('Lỗi bộ chạy','error');appendOutput(err.message,true)}
 }
 $('run').onclick=runOrStop
 $('packages').onclick=()=>{
   const body=elem('div','package-settings')
-  body.append(elem('p','','PyLab tự tìm thư viện từ lệnh import. Nếu tên cài đặt khác tên import, hoặc bạn cần một phiên bản cụ thể, hãy khai báo ở đây.'))
-  const label=elem('label','','Gói cần cài · mỗi dòng một gói')
+  const entry = current()
+  const access = accessFor(entry.id)
+  const choices = []
+  const toggle = (text,checked) => {
+    const label=elem('label','permission-choice')
+    const box=elem('input');box.type='checkbox';box.checked=checked
+    label.append(box,document.createTextNode(text));body.append(label)
+    return box
+  }
+  body.append(elem('p','','Mỗi lần chạy và xuất notebook chỉ dùng '+entry.name+' cùng các tệp bạn chọn dưới đây.'))
+  for(const file of workspace.files.filter(file=>file.id!==entry.id)) {
+    choices.push([file.id,toggle(file.name,access.sharedIds.includes(file.id))])
+  }
+  const online=toggle('Cho phép bài này tải gói qua Internet trong phiên này',access.online)
+  body.append(elem('p','','Mặc định dùng gói đi kèm. Khi bật mạng, mã và thư viện trong bài có thể kết nối tới PyPI và kho tệp PyPI. PyLab tải các gói Pyodide đã khóa từ jsDelivr.'))
+  const label=elem('label','','Gói PyPI cho phép cài · mỗi dòng một gói')
   const input=elem('textarea')
-  input.value=workspace.requirements;input.spellcheck=false;input.placeholder='python-slugify\nhumanize==4.12.3'
+  input.value=access.requirements ?? workspace.requirements;input.spellcheck=false;input.placeholder='python-slugify\nhumanize==4.12.3'
+  input.oninput=()=>input.setCustomValidity('')
   label.append(input);body.append(label)
-  body.append(elem('p','','Các gói ngoài bản local cần Internet. Nếu gói yêu cầu CPython, hệ điều hành hoặc GPU, hãy xuất notebook và mở bằng Jupyter hoặc Google Colab.'))
-  dialog('Gói Python',body,[['export','Xuất notebook','secondary'],['ok','Lưu','primary']],async action=>{
+  dialog('Gói và tệp của '+entry.name,body,[['export','Xuất notebook','secondary'],['ok','Lưu','primary']],async action=>{
+    try {checkPackages(input.value)} catch(error){input.setCustomValidity(error.message);input.reportValidity();return}
+    const sharedIds=choices.filter(([,box])=>box.checked).map(([id])=>id)
     if(action==='export'){
-      try {const {exportNotebook}=await import('./notebook.js');await exportNotebook(workspace.files,current(),input.value);notify('Đã xuất notebook kèm mã và danh sách gói.')}
+      try {const {exportNotebook}=await import('./notebook.js');await exportNotebook(filesForRun(workspace.files,entry,sharedIds),entry,input.value);notify('Đã xuất notebook với các tệp đã chọn.')}
       catch(error){notify(error.message)}
       return
     }
-    workspace.requirements=input.value.trim();persist();modal.close();notify('Đã lưu danh sách gói cho lần chạy tiếp theo.')
+    permissions.set(entry.id,{sharedIds,online:online.checked,requirements:input.value.trim()})
+    workspace.requirements=input.value.trim();persist();modal.close();notify('Đã lưu quyền chạy cho tệp này trong phiên hiện tại.')
   })
 }
 $('help').onclick=()=>{
@@ -293,7 +334,7 @@ $('help').onclick=()=>{
   for(const [title,text] of [
     ['Chạy chương trình','Dùng Ctrl+B hoặc Ctrl+Enter để chạy hoặc dừng (⌘ trên Mac). Ctrl+S tải tệp .py.'],
     ['Nhập dữ liệu','Khi input() chờ, gõ trong Terminal rồi nhấn Enter. Ctrl+D hoặc EOF kết thúc đầu vào. Trong thẻ Đầu vào có thể chọn dùng các dòng soạn sẵn.'],
-    ['Làm việc với nhiều tệp','Dấu + tạo tệp mới. Đặt hàm trong cong_cu.py, rồi dùng from cong_cu import … trong tệp chính. Nút ⋯ bên cạnh tệp cho phép đổi tên và xóa.'],
+    ['Làm việc với nhiều tệp','Dấu + tạo tệp mới. Trong tệp chính, chọn mô-đun cần dùng ở Gói và tệp rồi dùng import. Nút ⋯ bên cạnh tệp cho phép đổi tên và xóa.'],
     ['Giữ bài làm','Web tự lưu theo trình duyệt. Bấm biểu tượng tải xuống hoặc Ctrl + S để lấy tệp .py. Xóa dữ liệu trình duyệt cũng xóa bài đã lưu.'],
     ['Di chuyển bằng bàn phím','Trong vùng mã, Tab thụt lề. Bấm Esc rồi Tab để chuyển đến điều khiển kế tiếp.']
   ])list.append(elem('dt','',title),elem('dd','',text))

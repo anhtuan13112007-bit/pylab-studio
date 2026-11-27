@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node scripts/runtime.mjs && vite --host 127.0.0.1",
     "build": "node scripts/runtime.mjs && vite build",
-    "start": "node scripts/serve.mjs"
+    "start": "node scripts/serve.mjs",
+    "test:security": "node --test scripts/security.test.mjs"
   },
   "dependencies": {
     "codemirror": "6.0.2",

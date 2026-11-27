@@ -1,7 +1,7 @@
 import http from 'node:http'
 import path from 'node:path'
 import { createReadStream, existsSync } from 'node:fs'
-import { stat } from 'node:fs/promises'
+import { realpath, stat } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
 
@@ -10,14 +10,30 @@ if (!existsSync(path.join(root, 'index.html'))) {
   console.error('Thiếu bản web. Chạy npm ci rồi npm run build.')
   process.exit(1)
 }
+const publicRoot = await realpath(root)
+const headers = {
+  'X-Content-Type-Options':'nosniff',
+  'Referrer-Policy':'no-referrer',
+  'Permissions-Policy':'camera=(), microphone=(), geolocation=(), usb=(), serial=(), hid=(), payment=()',
+  'Content-Security-Policy':"frame-ancestors 'self'",
+  'X-Frame-Options':'SAMEORIGIN'
+}
 const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.css':'text/css; charset=utf-8', '.wasm':'application/wasm', '.json':'application/json', '.svg':'image/svg+xml', '.zip':'application/zip' }
 const server = http.createServer(async (req, res) => {
+  for (const [key,value] of Object.entries(headers)) res.setHeader(key,value)
+  if (req.headers.host !== '127.0.0.1:' + server.address().port && req.headers.host !== 'localhost:' + server.address().port) {
+    res.writeHead(403).end();return
+  }
+  if (!['GET','HEAD'].includes(req.method)) {res.writeHead(405,{Allow:'GET, HEAD'}).end();return}
   try {
     const route = decodeURIComponent(new URL(req.url, 'http://localhost').pathname)
-    const file = path.resolve(root, '.' + (route === '/' ? '/index.html' : route))
-    if (!file.startsWith(path.resolve(root) + path.sep) || !(await stat(file)).isFile()) throw Error()
+    const file = path.resolve(publicRoot, '.' + (route === '/' ? '/index.html' : route))
+    if (!file.startsWith(publicRoot + path.sep)) throw Error()
+    const canonical = await realpath(file)
+    if (!canonical.startsWith(publicRoot + path.sep) || !(await stat(canonical)).isFile()) throw Error()
     res.writeHead(200, { 'Content-Type': types[path.extname(file)] || 'application/octet-stream' })
-    createReadStream(file).on('error', () => res.destroy()).pipe(res)
+    if (req.method === 'HEAD') {res.end();return}
+    createReadStream(canonical).on('error', () => res.destroy()).pipe(res)
   } catch { res.writeHead(404).end() }
 })
 server.on('error', err => {

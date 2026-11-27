@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; script-src 'unsafe-eval' 'sha256-Hgt4RKGm88Ksry4DvqHZWtLa5lUN9L5Wzq/BsYP8ZOY=' blob:; worker-src blob:; connect-src https://pypi.org https://files.pythonhosted.org">
+<meta name="referrer" content="no-referrer">
+<title>Bộ chạy Python</title></head><body><script>
+'use strict'
+window.addEventListener('message', function start(event) {
+  if (self.origin !== 'null' || event.origin !== new URL(location.href).origin) return
+  if (event.source !== parent || parent === window || !event.ports[0] || !event.data?.job || typeof event.data.source !== 'string') return
+  window.removeEventListener('message', start)
+  const port = event.ports[0]
+  try {
+    if (!event.data.job.online) {
+      const policy = document.createElement('meta')
+      policy.httpEquiv = 'Content-Security-Policy'
+      policy.content = "connect-src 'none'"
+      document.head.append(policy)
+    }
+    const url = URL.createObjectURL(new Blob([event.data.source], {type:'text/javascript'}))
+    const worker = new Worker(url)
+    worker.onerror = () => event.ports[1]?.postMessage('error')
+    worker.postMessage(event.data.job, [port])
+    window.addEventListener('pagehide', () => {worker.terminate();URL.revokeObjectURL(url)}, {once:true})
+  } catch (error) {port.postMessage({type:'failure',message:error.message})}
+})
+</script></body></html>

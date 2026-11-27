@@ -1,12 +1,19 @@
 """Prepare explicitly requested distributions, then infer remaining imports."""
 import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 
 catalog = json.loads(catalog_json)
 specified = [line.strip() for line in declarations.splitlines()
              if line.strip() and not line.lstrip().startswith("#")]
+
+if len(specified) > 32 or any(len(spec) > 160 or not re.fullmatch(
+    r"[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?(?:==[A-Za-z0-9]+(?:[._+!-][A-Za-z0-9]+)*)?",
+    spec
+) for spec in specified):
+    raise ValueError("Tên gói hoặc phiên bản không hợp lệ.")
 
 
 def available(name):
@@ -40,14 +47,13 @@ for module in workspace_imports(Path("/home/pyodide"), entry):
     if available(module):
         continue
     package = catalog.get(module)
-    if not package and (module in sys.stdlib_module_names or module.startswith("_")):
+    if not package:
+        if module not in sys.stdlib_module_names and not module.startswith("_"):
+            remember_error(module, "Mở Gói và tệp để chọn mô-đun của bài hoặc khai báo gói cần tải.")
         continue
     show_progress(package or module)
     try:
-        if package:
-            await load_catalog(package)
-        else:
-            await pip_install(module)
+        await load_catalog(package)
     except Exception as error:
         # Optional imports (try/except or platform branches) must still get to
         # execute. Show the installation detail if the actual import fails.

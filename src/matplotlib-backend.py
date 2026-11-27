@@ -20,6 +20,9 @@ class FigureManager(FigureManagerBase):
         title = figure.get_label() or next(
             (ax.get_title() for ax in figure.axes if ax.get_title()), ""
         )
+        width, height = self.canvas.get_width_height()
+        if width > 8192 or height > 8192 or width * height > 16_000_000:
+            raise ValueError("Đồ thị quá lớn. Hãy giảm kích thước hình hoặc DPI.")
         with BytesIO() as image:
             self.canvas.print_png(image)
             send_png(self._plot_id, self.num, title, image.getvalue())

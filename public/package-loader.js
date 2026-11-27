@@ -1,51 +1,51 @@
-// Only the dedicated worker sees this routing table. Requests for student code,
-// PyPI metadata and the app itself continue to use their original addresses.
-function routePackageArchives(indexURL, catalog) {
-  const archives = new Map(catalog.remoteFiles.map(file => [
-    new URL(file, indexURL).href, new URL(file, catalog.cdn).href
-  ]))
-  const original = self.fetch.bind(self)
-  self.fetch = (input, options) => {
-    const url = input instanceof Request ? input.url : new URL(input, self.location.href).href
-    const target = archives.get(url)
-    if (!target) return original(input, options)
-    const request = new Request(input, options)
-    return original(target, {
-      method: 'GET', mode: 'cors', credentials: 'omit',
-      integrity: request.integrity, signal: request.signal, cache: request.cache
-    })
+// Only entries from the Pyodide release lock can be requested through the editor.
+const runtimeIndex = 'https://runtime.invalid/'
+function setupRuntimeAssets(port, online, readInput) {
+  const waiting = new Map()
+  const nativeFetch = self.fetch.bind(self)
+  port.onmessage = ({data}) => {
+    if (data.type === 'stdin') {readInput(data.value);return}
+    const pending = waiting.get(data.name)
+    if (data.type !== 'asset' || !pending) return
+    waiting.delete(data.name)
+    if (data.error) pending.reject(Error(data.error))
+    else pending.resolve(data.bytes)
+  }
+  self.fetch = async (input, options) => {
+    const url = new URL(input instanceof Request ? input.url : input, runtimeIndex)
+    if (url.origin === 'https://runtime.invalid') {
+      const name = url.pathname.slice(1)
+      if (!name || name.includes('/') || url.search || url.hash) throw Error('Tên tài nguyên không hợp lệ.')
+      let pending = waiting.get(name)
+      if (!pending) {
+        let resolve, reject
+        const promise = new Promise((yes,no) => {resolve=yes;reject=no})
+        pending = {promise,resolve,reject}
+        waiting.set(name,pending)
+        port.postMessage({type:'asset',name})
+      }
+      const bytes = await pending.promise
+      return new Response(bytes,{headers:{'Content-Type':name.endsWith('.wasm') ? 'application/wasm' : 'application/octet-stream'}})
+    }
+    if (!online || !['https://pypi.org','https://files.pythonhosted.org'].includes(url.origin)) {
+      throw Error('Kết nối này nằm ngoài quyền của bài chạy.')
+    }
+    return nativeFetch(input, {...options, credentials:'omit', referrerPolicy:'no-referrer'})
   }
 }
-
-async function requiredText(url) {
-  const response = await fetch(url)
-  if (!response.ok) throw new Error('Không tải được thành phần PyLab: ' + response.status + ' ' + url)
-  return response.text()
-}
-
-async function loadWorkspacePackages(runtime, filename, requirements, indexURL) {
-  const [catalogText, scanner, installer] = await Promise.all([
-    requiredText(new URL('package-sources.json', indexURL)),
-    requiredText(new URL('workspace-imports.py', self.location.href)),
-    requiredText(new URL('install-packages.py', self.location.href))
-  ])
-  const catalog = JSON.parse(catalogText)
-  routePackageArchives(indexURL, catalog)
+async function loadWorkspacePackages(runtime, data, post) {
   const issues = Object.create(null)
-  const show = names => self.postMessage({type:'packages', names:[names]})
   const scope = runtime.toPy({
-    entry: filename, declarations: requirements, catalog_json: JSON.stringify(catalog.imports),
-    show_progress: show, remember_error: (name, message) => { issues[name] = message },
-    load_catalog: async name => {
-      await runtime.loadPackage(name, {checkIntegrity:true, messageCallback:()=>{}, errorCallback:message=>console.warn(message)})
-      if (!Object.hasOwn(runtime.loadedPackages, name)) throw new Error('Có thể tải lại trang và kiểm tra kết nối đến kho Pyodide.')
+    entry:data.name, declarations:data.requirements, catalog_json:JSON.stringify(data.imports),
+    show_progress:name => post({type:'packages',name}),
+    remember_error:(name,message) => {issues[name]=message},
+    load_catalog:async name => {
+      await runtime.loadPackage(name,{checkIntegrity:true,messageCallback:()=>{},errorCallback:()=>{}})
+      if (!Object.hasOwn(runtime.loadedPackages,name)) throw Error('Gói chưa có trong bản cục bộ hoặc chưa được phép tải.')
     }
   })
   try {
-    await runtime.runPythonAsync(scanner + '\n' + installer, {globals:scope})
-  } catch (error) {
-    const message = String(error.message || error).trim().split('\n').at(-1)
-    throw new Error(message.replace(/^ValueError: /, ''))
-  } finally { scope.destroy() }
+    await runtime.runPythonAsync(data.scanner + '\n' + data.installer, {globals:scope})
+  } finally {scope.destroy()}
   return issues
 }
