@@ -31,12 +31,12 @@ Mở địa chỉ máy chủ in ra, mặc định là `http://127.0.0.1:4173`. M
 
 | Khu vực | Bạn có thể làm gì |
 | --- | --- |
-| Thanh bên | Chuyển giữa trình soạn thảo và thư viện. Dấu `+` tạo tệp. Nút `⋯` đổi tên hoặc xóa tệp sau khi xác nhận. Nhập mã UTF-8 từ tệp `.py` tối đa 1 MB. Tệp nhập trùng tên nhận hậu tố. |
+| Thanh bên | Mũi tên trên thanh trên cùng thu hoặc mở thanh PyLab. Chuyển giữa trình soạn thảo và thư viện. Dấu `+` tạo tệp. Nút `⋯` đổi tên hoặc xóa tệp sau khi xác nhận. Nhập mã UTF-8 từ tệp `.py` tối đa 1 MB. Tệp nhập trùng tên nhận hậu tố. |
 | Trình soạn thảo | Tô màu cú pháp, đánh số dòng, thụt lề 4 dấu cách, đánh dấu cặp ngoặc, gấp khối, tìm trong mã và hoàn tác. Thanh dưới hiển thị vị trí con trỏ. |
 | Bàn làm việc | Chạy tệp đang mở, dừng ngay cả khi mã lặp vô hạn, tải tệp hiện tại hoặc mở rộng vùng làm việc. Mỗi lần chạy dùng một môi trường Python mới. |
 | Terminal | Xem lệnh chạy, kết quả, lỗi và thời gian thực thi sau khi nạp Python. Traceback hiển thị tên tệp và số dòng. Nút thùng rác xóa phần hiển thị. Đầu ra giới hạn 65.536 ký tự để bảo vệ độ phản hồi. |
 | Đầu vào | Tệp mới nhận dữ liệu trực tiếp trong Terminal. Gõ một dòng tại dấu nhắc rồi bấm Enter. Dùng Ctrl+D hoặc nút EOF để báo kết thúc luồng nhập. Thẻ Đầu vào cho phép chuyển sang dữ liệu soạn sẵn để chạy lại một bộ test. Tệp cũ có sẵn dữ liệu vẫn dùng chế độ soạn sẵn. |
-| Hình nền | Chọn **Hình nền** ở góc phải banner. Để dùng ảnh phía sau toàn bộ trang, chọn **Nền toàn trang → Ảnh của tôi**, chọn ảnh rồi bấm **Lưu giao diện**. **Gỡ ảnh** rồi lưu sẽ xóa bản ảnh nền đã lưu trong trình duyệt. Banner có tùy chọn ảnh và màu riêng. |
+| Hình nền | Mở **Hình nền** trên thanh trên cùng. Chọn ảnh hoặc **Video từ máy** (MP4/WebM, hỗ trợ 4K), xem trước rồi bấm **Lưu giao diện**. Hai thanh trượt chỉnh riêng độ trong suốt của trình soạn thảo và Terminal. Có thể tạm dừng video ngay trên thanh trên. |
 | Tệp và mô-đun | Mặc định, thư mục Python ảo chỉ có tệp đang chạy. Trong **Gói và tệp**, đánh dấu mô-đun bạn muốn bài này được đọc rồi bấm **Lưu**. Những tệp mới do chính chương trình Python ghi ra chỉ tồn tại trong lần chạy đó. |
 | Thư viện mẫu | 8 bài về biến, nhập liệu, vòng lặp, dữ liệu và toán học. Tìm theo tên, chủ đề, tên tệp hoặc mô tả. Mở lại một mẫu sẽ quay về bản bạn đã sửa. |
 | Thiết bị và hiển thị | Bài làm và giao diện sáng/tối được lưu trong trình duyệt. Máy tính hiển thị mã và kết quả cạnh nhau. Điện thoại xếp hai khung theo chiều dọc và thu thanh bên vào nút menu. |
@@ -92,11 +92,11 @@ print(binh_phuong(7))
 | `index.html` | Nội dung tiếng Việt, bố cục thanh bên, hai bảng làm việc, thư viện và hộp thoại. |
 | `src/style.css` | Bố cục, màu sáng/tối, nút, thẻ bài, các điểm chuyển giao diện theo chiều rộng màn hình. |
 | `src/editor-colors.css` | Màu cú pháp Python và kiểu hiển thị hàng tệp. |
-| `src/appearance.js`, `src/terrain.js`, `public/favicon.svg` | Tùy chỉnh hình nền, xử lý ảnh trên thiết bị, vẽ minh họa và biểu trưng. |
+| `src/appearance.js`, `src/appearance-store.js`, `src/background-photo.js`, `src/background-video.js` | Xem trước và lưu ảnh, video nền cùng độ trong suốt trên thiết bị. |
 | `src/terminal.js`, `src/sandbox.js`, `public/sandbox.html` | Dựng khung cách ly, chuyển các tài nguyên công khai và trả dòng nhập qua kênh riêng cho từng lượt chạy. `public/terminal-sw.js` gỡ đăng ký bản cầu nối cũ khi trình duyệt cập nhật. |
 | `src/main.js` | Điều hướng, nút bấm, quản lý tệp, lọc mẫu, chủ đề, phím tắt và giao tiếp với Web Worker. |
 | `src/editor.js` | Cấu hình CodeMirror, chế độ Python, tô màu và theo dõi vị trí con trỏ. |
-| `src/examples.js` | Nội dung mặc định `starter`, dữ liệu ví dụ và danh sách 3 mẫu đầu xuất hiện ở bàn làm việc. |
+| `src/examples.js` | Nội dung mặc định `starter` và các bài trong Thư viện mẫu. |
 | `src/storage.js` | Đọc, ghi không gian làm việc phiên bản 1 và kiểm tra tên tệp. |
 | `src/icons.js` | Các biểu tượng Lucide được đưa vào bản dựng. |
 | `public/workspace-imports.py`, `public/install-packages.py`, `public/package-loader.js` | Quét tệp của bài, nạp gói đã khai báo, phân giải các import và định tuyến các bản dựng Pyodide tới nguồn tương ứng. |
@@ -107,7 +107,7 @@ print(binh_phuong(7))
 | `vite.config.js`, `package.json`, `package-lock.json` | Đường dẫn tài nguyên tương đối, lệnh dự án và phiên bản thư viện. |
 | `docs/` | Bản web đã dựng, gồm giao diện và bộ chạy Python. Máy chủ local và GitHub Pages đều phục vụ thư mục này. Sửa các tệp nguồn rồi dựng lại để cập nhật. |
 
-**Đổi giao diện.** Mở `src/style.css`. Sửa biến `--page`, `--surface`, `--ink`, `--green` cho nền, khung, chữ và màu nhấn. Cập nhật cả khối `:root[data-theme=dark]`. Đổi màu banner ở `.hero`, màu nút chạy ở `.primary`. Đổi tựa và dòng mô tả trên banner ở `index.html`. Xem lại trên màn hình hẹp và rộng bằng `npm run dev`.
+**Đổi giao diện.** Mở `src/style.css`. Sửa biến `--page`, `--surface`, `--ink`, `--green` cho nền, khung, chữ và màu nhấn. Cập nhật cả khối `:root[data-theme=dark]`. Đổi màu nút chạy ở `.primary` và tiêu đề bàn làm việc ở `index.html`. Xem lại trên màn hình hẹp và rộng bằng `npm run dev`.
 
 **Đổi bài chào mặc định.** Sửa `starter.code` và `starter.stdin` trong `src/examples.js`. Để xem như người mới, thử bằng một hồ sơ trình duyệt khác. Các tệp người học đã lưu vẫn giữ nội dung của họ.
 
@@ -130,7 +130,7 @@ print(sum(range(1, n + 1)))`
 }
 ```
 
-Các màu thẻ có sẵn là `green`, `orange` và `purple`. Chọn tên icon từ `src/icons.js`. Đưa mẫu vào ba vị trí đầu để hiển thị ở mục **Thử một ví dụ**. Chạy ví dụ trên với đầu vào `10` và kiểm tra kết quả `55`.
+Các màu thẻ có sẵn là `green`, `orange` và `purple`. Chọn tên icon từ `src/icons.js`. Mở **Thư viện mẫu** để xem các ví dụ. Chạy ví dụ trên với đầu vào `10` và kiểm tra kết quả `55`.
 
 ## 6. Thêm chức năng mới
 
@@ -192,7 +192,7 @@ Với NumPy, dùng `import numpy as np` rồi gọi `np.array([1, 2, 3, 4])`. T�
 
 ### Quyền của một lần chạy
 
-Ảnh nền JPG, PNG và WebP được kiểm tra định dạng thực, giới hạn 8 MB và 32 triệu điểm ảnh. PyLab vẽ lại ảnh thành JPEG rồi lưu bản thu nhỏ trong trình duyệt. Việc chọn ảnh, xem trước và lưu diễn ra trên thiết bị. Ảnh nền toàn trang và ảnh banner có thể chọn riêng. Đóng hộp thoại sẽ bỏ thay đổi chưa lưu.
+Ảnh nền JPG, PNG và WebP được kiểm tra định dạng thực, giới hạn 8 MB và 32 triệu điểm ảnh. PyLab vẽ lại ảnh thành JPEG rồi lưu bản thu nhỏ trong trình duyệt. Việc chọn ảnh, xem trước và lưu diễn ra trên thiết bị. Video được phát trực tiếp từ bản sao trên thiết bị, giữ độ phân giải gốc và tắt tiếng. Ảnh toàn trang đã lưu ở bản cũ vẫn được đọc. Hình nền mới và tùy chỉnh được lưu bằng IndexedDB khi trình duyệt hỗ trợ. Đóng hộp thoại sẽ bỏ thay đổi chưa lưu.
 
 Mỗi lần bấm **Chạy mã**, trang tạo một iframe sandbox chỉ có quyền chạy script. Web Worker của Python có origin riêng dạng opaque. Trang soạn thảo gửi bản sao các tệp được chọn và chỉ chuyển dòng nhập khi Terminal yêu cầu. Lớp trung gian chỉ phục vụ tài nguyên có trong bản phát hành. Các gói Pyodide được kiểm tra SHA-256 theo lockfile.
 

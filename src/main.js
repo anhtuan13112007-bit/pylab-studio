@@ -67,15 +67,45 @@ $('theme').onclick=()=> {
   setTheme(value); try {localStorage.setItem('pylab.theme',value)} catch {}
 }
 
-function closeMenu() {
-  $('sidebar').classList.remove('open'); $('scrim').hidden=true; $('menu').setAttribute('aria-expanded','false')
+const desktop = matchMedia('(min-width:931px)')
+let collapsed = false
+let mobileOpen = false
+try { collapsed = localStorage.getItem('pylab.sidebar.collapsed') === 'true' } catch {}
+
+function syncSidebar() {
+  const focusMode = document.body.classList.contains('focus-mode')
+  const open = !focusMode && (desktop.matches ? !collapsed : mobileOpen)
+  document.body.classList.toggle('sidebar-collapsed',collapsed)
+  $('sidebar').classList.toggle('open',!desktop.matches && open)
+  $('sidebar').inert = !open
+  $('scrim').hidden = desktop.matches || !open
+  const button = $('menu')
+  const label = open ? 'Thu thanh PyLab' : 'Mở thanh PyLab'
+  button.title = label
+  button.setAttribute('aria-label',label)
+  button.setAttribute('aria-expanded',String(open))
+  button.replaceChildren(icon(open?'chevron-left':'chevron-right'))
+  editor.measure()
 }
-$('menu').onclick=()=>{ $('sidebar').classList.add('open');$('scrim').hidden=false;$('menu').setAttribute('aria-expanded','true') }
-$('scrim').onclick=closeMenu
-matchMedia('(min-width:931px)').addEventListener('change',e=>{if(e.matches)closeMenu()})
+function closeMenu() { mobileOpen=false;syncSidebar() }
+$('menu').onclick=()=>{
+  if(document.body.classList.contains('focus-mode')) {
+    setFocusMode(false)
+    collapsed=false;mobileOpen=true
+  } else if(desktop.matches) collapsed=!collapsed
+  else mobileOpen=!mobileOpen
+  if(desktop.matches) {try {localStorage.setItem('pylab.sidebar.collapsed',String(collapsed))} catch {}}
+  syncSidebar()
+  if(!desktop.matches && mobileOpen)$('sidebar-close').focus()
+}
+function dismissDrawer() {closeMenu();$('menu').focus()}
+$('sidebar-close').onclick=dismissDrawer
+$('scrim').onclick=dismissDrawer
+desktop.addEventListener('change',closeMenu)
 
 function setFocusMode(on) {
   document.body.classList.toggle('focus-mode',on)
+  mobileOpen=false;syncSidebar()
   const label = on?'Thu gọn bàn làm việc':'Mở rộng bàn làm việc'
   $('focus').title=label; $('focus').setAttribute('aria-label',label); $('focus').replaceChildren(icon(on?'minimize-2':'maximize-2'))
   editor.measure()
@@ -202,7 +232,6 @@ function card(s) {
   button.onclick=()=>openExample(s)
   return button
 }
-$('quick-list').append(...examples.slice(0,3).map(card))
 for(const topic of new Set(examples.map(s=>s.topic)))$('category').append(new Option(topic,topic))
 const normalize=text=>text.toLocaleLowerCase('vi').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replaceAll('đ','d')
 function showLibrary() {
@@ -343,7 +372,7 @@ $('help').onclick=()=>{
 document.addEventListener('keydown',e=>{
   if(document.querySelector('dialog[open]'))return
   if(view==='studio' && e.shiftKey && e.key==='F5'){e.preventDefault();if(task)stop();return}
-  if(e.key==='Escape'){closeMenu();if(document.body.classList.contains('focus-mode'))setFocusMode(false)}
+  if(e.key==='Escape'){if(mobileOpen)dismissDrawer();else closeMenu();if(document.body.classList.contains('focus-mode'))setFocusMode(false)}
   if(view!=='studio'||(!e.ctrlKey&&!e.metaKey)||e.defaultPrevented)return
   if(e.key==='Enter'||e.key.toLowerCase()==='b'){e.preventDefault();if(!e.repeat)runOrStop()}
   if(e.key.toLowerCase()==='s'){e.preventDefault();persist();download()}

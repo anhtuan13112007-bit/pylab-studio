@@ -5,6 +5,16 @@ import {createHash} from 'node:crypto'
 import vm from 'node:vm'
 import {filesForRun, checkPackages} from '../src/run-permissions.js'
 import {fitPhoto} from '../src/background-photo.js'
+import {readVideo} from '../src/background-video.js'
+
+test('Video nền kiểm tra chữ ký tệp và có thể hủy trước khi mở bộ giải mã', async () => {
+  const signal=new AbortController().signal
+  await assert.rejects(readVideo(new Blob(['fixture'],{type:'video/mp4'}),signal),/MP4 hoặc WebM/)
+  const stop=new AbortController()
+  stop.abort()
+  const header=Uint8Array.from([0x1a,0x45,0xdf,0xa3])
+  await assert.rejects(readVideo(new Blob([header]),stop.signal),{name:'AbortError'})
+})
 
 test('Kiểm tra loại ảnh, dung lượng và số điểm ảnh trước khi giải mã', async () => {
   await assert.rejects(fitPhoto(new Blob(['fixture'],{type:'image/svg+xml'}),1920,1080),/không hợp lệ/)

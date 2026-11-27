@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; frame-src 'self'; worker-src 'none'; connect-src 'self' https://cdn.jsdelivr.net/pyodide/v0.27.7/full/">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src blob:; frame-src 'self'; worker-src 'none'; connect-src 'self' https://cdn.jsdelivr.net/pyodide/v0.27.7/full/">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#244f38">
   <meta name="description" content="Không gian viết và chạy Python bằng tiếng Việt, ngay trên trình duyệt.">
@@ -11,10 +11,11 @@
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
 </head>
 <body>
-  <div id="page-wallpaper" aria-hidden="true" hidden></div>
+  <div id="page-wallpaper" aria-hidden="true" hidden><video id="wallpaper-video" muted loop playsinline preload="metadata" hidden></video></div>
   <a class="skip" href="#workspace">Đến bàn làm việc</a>
   <aside class="sidebar" id="sidebar" aria-label="Thanh điều hướng">
     <a class="brand" href="#studio" aria-label="PyLab – Trang soạn thảo"><img src="./favicon.svg" width="37" height="37" alt=""><strong>PyLab<span>.</span></strong></a>
+    <button class="icon mobile sidebar-close" id="sidebar-close" title="Thu thanh PyLab" aria-label="Thu thanh PyLab" aria-controls="sidebar"><i data-i="chevron-left"></i></button>
     <nav aria-label="Không gian" class="navgroup">
       <div class="section-label">Không gian</div>
       <button data-route="studio" class="nav-item selected"><i data-i="square-code"></i>Trình soạn thảo</button>
@@ -33,18 +34,13 @@
   <button id="scrim" class="scrim" aria-label="Đóng thanh điều hướng" hidden></button>
   <div class="shell">
     <header class="topbar">
-      <div class="crumb"><button class="icon mobile" id="menu" aria-label="Mở thanh điều hướng" aria-expanded="false"><i data-i="menu"></i></button><a class="mobile-brand" href="#studio" aria-label="PyLab"><img src="./favicon.svg" width="23" height="23" alt="">PyLab.</a><i data-i="panels-top-left" class="desk"></i><span class="desk">Không gian học tập</span><span class="slash desk">/</span><b id="crumb-page">Trình soạn thảo</b></div>
-      <div class="top-actions"><span id="saved" class="saved" role="status"><i data-i="cloud-check"></i><span>Đã lưu trên máy</span></span><span class="vr"></span><button id="theme" class="icon" title="Chuyển sang giao diện tối" aria-label="Chuyển sang giao diện tối"><i data-i="moon"></i></button></div>
+      <div class="crumb"><button class="icon" id="menu" aria-label="Thu thanh PyLab" aria-expanded="true" aria-controls="sidebar"><i data-i="chevron-left"></i></button><a class="mobile-brand" href="#studio" aria-label="PyLab"><img src="./favicon.svg" width="23" height="23" alt="">PyLab.</a><span class="desk">Không gian học tập</span><span class="slash desk">/</span><b id="crumb-page">Trình soạn thảo</b></div>
+      <div class="top-actions"><button class="icon" id="video-motion" hidden aria-label="Tạm dừng video nền" title="Tạm dừng video nền"><i data-i="pause"></i></button><button class="appearance-button" id="appearance" type="button" aria-haspopup="dialog"><i data-i="image"></i><span>Hình nền</span></button><span id="saved" class="saved" role="status"><i data-i="cloud-check"></i><span>Đã lưu trên máy</span></span><span class="vr"></span><button id="theme" class="icon" title="Chuyển sang giao diện tối" aria-label="Chuyển sang giao diện tối"><i data-i="moon"></i></button></div>
     </header>
     <main>
       <section id="studio-page">
-        <section class="hero" id="hero" aria-labelledby="hero-title"><div class="hero-photo" aria-hidden="true"></div><button id="appearance" class="hero-settings" title="Tùy chỉnh hình nền" aria-label="Tùy chỉnh hình nền">✎ <span>Hình nền</span></button><canvas id="terrain" aria-hidden="true"></canvas>
-          <div class="hero-content"><div class="hero-kicker"><span></span> PYTHON STUDIO</div>
-          <h1 id="hero-title">Phòng thực hành Python<span>.</span></h1>
-          <p>Viết mã, chạy thử và khám phá Python ngay trong trình duyệt.</p></div>
-        </section>
         <section id="workspace" tabindex="-1" aria-labelledby="workspace-heading">
-          <div class="section-head"><h2 id="workspace-heading">Bàn làm việc</h2>
+          <div class="section-head"><h1 id="workspace-heading">Bàn làm việc</h1>
             <div class="run-tools"><button class="secondary" id="packages" type="button">Gói và tệp</button><button class="primary" id="run"><i data-i="play"></i><span>Chạy mã</span><kbd>Ctrl B</kbd></button></div>
           </div>
           <div class="panels">
@@ -66,7 +62,6 @@
             </section>
           </div>
         </section>
-        <section class="quick-section"><div class="section-head"><h2>Thử một ví dụ</h2><button class="text-link" data-route="library">Xem thư viện <i data-i="library-big"></i></button></div><div id="quick-list" class="cards"></div></section>
       </section>
       <section id="library-page" hidden><div class="library-head"><div class="section-label">PyLab / Thực hành</div><h1>Thư viện mẫu<span>.</span></h1><p>Chọn một bài để mở mã nguồn và thử nghiệm trong bàn làm việc.</p></div>
         <div class="filters"><label class="search"><i data-i="search"></i><input id="search" type="search" placeholder="Tìm ví dụ Python" aria-label="Tìm ví dụ Python"></label><select id="category" aria-label="Lọc chủ đề"><option value="">Mọi chủ đề</option></select></div>
@@ -78,17 +73,24 @@
   <dialog id="plot-dialog" aria-labelledby="plot-title"><div class="plot-view"><div class="dialog-head"><h2 id="plot-title">Đồ thị</h2><form method="dialog"><button class="icon" aria-label="Đóng đồ thị"><i data-i="x"></i></button></form></div><img id="plot-preview" alt=""><a id="plot-download" class="secondary" download>Tải ảnh PNG</a></div></dialog>
   <dialog id="appearance-dialog" aria-labelledby="appearance-title"><form id="appearance-form" class="dialog-box">
     <div class="dialog-head"><h2 id="appearance-title">Tùy chỉnh hình nền</h2><button type="button" id="appearance-close" class="icon" aria-label="Đóng tùy chỉnh"><i data-i="x"></i></button></div>
-    <div class="appearance-preview hero" aria-label="Xem trước banner"><div class="hero-photo"></div><canvas id="preview-art" aria-hidden="true"></canvas><strong>Python Studio</strong></div>
-    <div class="appearance-fields"><label>Hình trên banner<select id="art-mode"><option value="terrain">Địa hình</option><option value="wave">Sóng biển</option><option value="stars">Bầu trời sao</option><option value="plain">Màu trơn</option><option value="image">Ảnh của tôi</option></select></label>
-    <label id="image-control" hidden>Chọn ảnh trên thiết bị<input id="art-file" type="file" accept="image/jpeg,image/png,image/webp"></label>
-    <label>Màu banner<input id="art-color" type="color" value="#193e2b"></label>
-    <label>Độ đậm hình <output id="opacity-value"></output><input id="art-opacity" aria-label="Độ đậm hình" type="range" min="0" max="100" step="5"></label>
-    <label>Nền toàn trang<select id="page-palette"><option value="auto">Theo giao diện</option><option value="sky">Xanh trời</option><option value="lavender">Tím nhạt</option><option value="sand">Cát ấm</option><option value="image">Ảnh của tôi</option></select></label>
+    <div class="appearance-fields">
+    <label>Nền toàn trang<select id="page-palette"><option value="auto">Theo giao diện</option><option value="sky">Xanh trời</option><option value="lavender">Tím nhạt</option><option value="sand">Cát ấm</option><option value="image">Ảnh của tôi</option><option value="video">Video từ máy</option></select></label>
     <div id="page-image-control" hidden>
       <label>Chọn ảnh nền toàn trang<input id="page-photo-file" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="page-photo-help"></label>
       <small id="page-photo-help">JPG, PNG hoặc WebP, tối đa 8 MB. Ảnh được xử lý và lưu trong trình duyệt này.</small>
       <div id="page-photo-tools" hidden><img id="page-photo-preview" alt="Xem trước ảnh nền toàn trang"><button id="page-photo-remove" class="secondary" type="button">Gỡ ảnh</button></div>
-    </div></div>
+    </div>
+    <div id="page-video-control" hidden>
+      <label>Chọn video nền<input id="video-file" type="file" accept="video/mp4,video/webm,.mp4,.webm" aria-describedby="video-help"></label>
+      <small id="video-help">MP4 hoặc WebM, hỗ trợ 4K. Video lưu trên thiết bị và phát lặp, tắt tiếng.</small>
+      <div id="video-tools" hidden><span id="video-size"></span><button id="video-remove" class="secondary" type="button">Gỡ video</button></div>
+    </div>
+    <fieldset class="pane-settings"><legend>Độ trong suốt của khung</legend>
+      <label for="editor-glass">Trình soạn thảo <output id="editor-glass-value" for="editor-glass"></output></label>
+      <input id="editor-glass" type="range" min="0" max="100" step="1">
+      <label for="terminal-glass">Terminal <output id="terminal-glass-value" for="terminal-glass"></output></label>
+      <input id="terminal-glass" type="range" min="0" max="100" step="1">
+    </fieldset></div>
     <p id="appearance-note" role="status"></p><div class="dialog-actions"><button type="button" id="appearance-default" class="secondary">Mặc định</button><button type="submit" class="primary">Lưu giao diện</button></div>
   </form></dialog>
   <div id="toast" role="status" hidden></div>

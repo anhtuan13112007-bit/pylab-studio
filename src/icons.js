@@ -4,8 +4,10 @@ import icon2 from 'lucide/icons/plus.svg?raw'
 import icon3 from 'lucide/icons/upload.svg?raw'
 import icon4 from 'lucide/icons/circle-help.svg?raw'
 import icon5 from 'lucide/icons/laptop.svg?raw'
-import icon6 from 'lucide/icons/menu.svg?raw'
-import icon7 from 'lucide/icons/panels-top-left.svg?raw'
+import left from 'lucide/icons/chevron-left.svg?raw'
+import right from 'lucide/icons/chevron-right.svg?raw'
+import picture from 'lucide/icons/image.svg?raw'
+import pause from 'lucide/icons/pause.svg?raw'
 import icon8 from 'lucide/icons/hard-drive.svg?raw'
 import icon9 from 'lucide/icons/moon.svg?raw'
 import icon10 from 'lucide/icons/sun.svg?raw'
@@ -40,8 +42,10 @@ const images = {
   'upload': icon3,
   'circle-help': icon4,
   'laptop': icon5,
-  'menu': icon6,
-  'panels-top-left': icon7,
+  'chevron-left': left,
+  'chevron-right': right,
+  image: picture,
+  pause,
   'hard-drive': icon8,
   'moon': icon9,
   'sun': icon10,
