@@ -46,7 +46,7 @@ Trang mở đầu tự chạy bài chào mẫu khi không gian chỉ còn tệp 
 
 Kéo tay nắm có vạch chéo ở chân trình soạn thảo hoặc Terminal để đổi kích thước. Trên máy tính, hai khung chia sẻ chiều rộng và có chiều cao riêng. Khi xếp dọc trên điện thoại, bạn chỉnh được cả hai chiều của từng khung độc lập. Bạn cũng có thể bấm tay nắm (hoặc dùng Tab rồi Enter), chỉnh hai thanh trượt bằng phím mũi tên và chọn **Mặc định** để đặt lại. Trình duyệt nhớ kích thước riêng cho hai kiểu bố cục.
 
-Ở chế độ sáng, video nền hiển thị nguyên màu. Vào **Hình nền** để tùy chỉnh độ trong suốt của từng khung. Các điều khiển có viền neon khi di chuột và phản hồi khi bấm. Hiệu ứng động tuân theo cài đặt giảm chuyển động của thiết bị.
+Ở chế độ sáng, video nền hiển thị nguyên màu. Vào **Hình nền** để tùy chỉnh độ trong suốt của từng khung. Khi bôi đen mã, chữ và nền vùng chọn dùng một cặp màu tương phản theo giao diện sáng hoặc tối. Trình soạn thảo và Terminal dùng màu mặc định cho các thao tác chuột. Hiệu ứng neon ở các khu vực còn lại tuân theo cài đặt giảm chuyển động của thiết bị.
 
 ### Phím tắt
 

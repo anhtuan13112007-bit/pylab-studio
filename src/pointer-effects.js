@@ -5,8 +5,11 @@ tracer.className = 'pointer-tracer'
 tracer.setAttribute('aria-hidden', 'true')
 let frame = 0, idleTimer
 document.addEventListener('pointermove', event => {
-  if (event.pointerType !== 'mouse' || reducedMotion.matches || event.buttons) return
   cancelAnimationFrame(frame)
+  if (event.pointerType !== 'mouse' || reducedMotion.matches || event.buttons || event.target.closest('.pane')) {
+    tracer.remove()
+    return
+  }
   frame = requestAnimationFrame(() => {
     const layer = event.target.closest('dialog[open]') || document.body
     if (tracer.parentElement !== layer) layer.append(tracer)
@@ -22,7 +25,7 @@ pulse.className = 'click-pulse'
 pulse.setAttribute('aria-hidden', 'true')
 let animation
 document.addEventListener('pointerdown', event => {
-  if (!event.isPrimary || event.button !== 0 || reducedMotion.matches) return
+  if (!event.isPrimary || event.button !== 0 || reducedMotion.matches || event.target.closest('.pane')) return
   const layer = event.target.closest('dialog[open]') || document.body
   animation?.cancel()
   layer.append(pulse)

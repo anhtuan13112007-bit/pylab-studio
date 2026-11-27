@@ -144,19 +144,18 @@ body{isolation:isolate}
 }
 
 :root {--neon-edge:#007c8c;--neon-pink:#bd337c}
-:root[data-theme=dark],.terminal-pane {--neon-edge:#44ebef;--neon-pink:#ff69bf}
+:root[data-theme=dark] {--neon-edge:#44ebef;--neon-pink:#ff69bf}
 @media(hover:hover) {
-  :is(button:not(:disabled,.scrim),a[href],select,input:not(:disabled),textarea:not(:disabled),[contenteditable=true]):hover {
+  :is(button:not(:disabled,.scrim),a[href],select,input:not(:disabled),textarea:not(:disabled),[contenteditable=true]):where(:not(.pane *)):hover {
     box-shadow:inset 2px 0 var(--neon-edge),inset -1px 0 var(--neon-pink),
       0 0 0 1px color-mix(in srgb,var(--neon-edge) 64%,transparent),
       0 0 10px color-mix(in srgb,var(--neon-pink) 20%,transparent);
   }
-  .pane:hover {border-color:var(--neon-edge)}
 }
-:is(button:not(:disabled,.scrim),a[href],select,input,textarea):active {
+:is(button:not(:disabled,.scrim),a[href],select,input,textarea):where(:not(.pane *)):active {
   outline:2px solid var(--neon-pink);outline-offset:-2px;
 }
-:is(button,a[href],select,input,textarea):focus-visible {outline:2px solid var(--neon-edge)}
+:is(button,a[href],select,input,textarea):where(:not(.pane *)):focus-visible {outline:2px solid var(--neon-edge)}
 .click-pulse {
   position:fixed;pointer-events:none;z-index:20;width:24px;height:24px;border-radius:35%;
   border:2px solid #43f6ff;box-shadow:2px 1px 0 #ff48ac,inset -1px -1px 0 #321332;

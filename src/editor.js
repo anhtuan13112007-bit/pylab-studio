@@ -1,5 +1,5 @@
 import { basicSetup } from 'codemirror'
-import { EditorView, keymap } from '@codemirror/view'
+import { Decoration, EditorView, keymap } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
 import { indentWithTab } from '@codemirror/commands'
 import { python } from '@codemirror/lang-python'
@@ -14,10 +14,17 @@ const colors = HighlightStyle.define([
   {tag:t.comment,color:'var(--tok-comment)',fontStyle:'italic'}
 ])
 
+// CodeMirror draws the selection background behind the syntax-colored text.
+const selectedText = Decoration.mark({class: 'cm-selectedText'})
+const selectionTextColors = EditorView.decorations.compute(['selection'], state =>
+  Decoration.set(state.selection.ranges.filter(range => !range.empty)
+    .map(range => selectedText.range(range.from, range.to)))
+)
+
 export function createEditor(parent, doc, onChange, onCursor, run) {
   const extensions = [
     keymap.of(['Mod-b','Mod-Enter'].map(key=>({key,run:()=>{run();return true}}))),
-    basicSetup, python(), syntaxHighlighting(colors), keymap.of([indentWithTab]), indentUnit.of('    '),
+    basicSetup, python(), syntaxHighlighting(colors), selectionTextColors, keymap.of([indentWithTab]), indentUnit.of('    '),
     EditorState.tabSize.of(4),
     EditorView.contentAttributes.of({'aria-label':'Mã nguồn Python', spellcheck:'false', autocapitalize:'off'}),
     EditorView.updateListener.of(update => {

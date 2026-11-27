@@ -1,6 +1,34 @@
 /* Python syntax colors follow the application theme. */
 :root{--tok-keyword:#893b80;--tok-string:#26704a;--tok-number:#986026;--tok-function:#285d91;--tok-comment:#69766b}
 :root[data-theme=dark]{--tok-keyword:#dfa1da;--tok-string:#a4d3a2;--tok-number:#ecc695;--tok-function:#a4c6ec;--tok-comment:#a5b2a3}
+
+#editor {
+  --selection-bg:#285994;
+  --selection-ink:#fff;
+  --selection-inactive:#526478;
+}
+:root[data-theme=dark] #editor {
+  --selection-bg:#a9c9ef;
+  --selection-ink:#10243b;
+  --selection-inactive:#b0bdcb;
+}
+#editor .cm-editor {--selection-fill:var(--selection-inactive)}
+#editor .cm-focused {--selection-fill:var(--selection-bg)}
+#editor .cm-selectionBackground {background-color:var(--selection-fill)}
+#editor .cm-selectedText, #editor .cm-selectedText * {
+  background-color:var(--selection-fill);
+  color:var(--selection-ink);
+}
+#editor .cm-activeLine:has(.cm-selectedText) {background:transparent}
+#editor .cm-line::selection, #editor .cm-line *::selection {
+  background-color:var(--selection-fill);
+  color:var(--selection-ink);
+}
+@media(forced-colors:active) {
+  #editor .cm-editor {--selection-fill:Highlight;--selection-ink:HighlightText}
+  #editor :is(.cm-selectionBackground,.cm-selectedText,.cm-selectedText *) {forced-color-adjust:none}
+}
+
 .file-row{display:flex;align-items:center;min-width:0;gap:2px}.file-row .file-link{flex:1;min-width:0}
 .file-options{flex:none;opacity:.5}.file-row:hover .file-options,.file-options:focus-visible{opacity:1}
 @media(pointer:coarse){.file-options{opacity:1}}
