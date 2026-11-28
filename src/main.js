@@ -12,7 +12,7 @@ import './pointer-effects.js'
 // The notebook exporter is loaded when a notebook is requested.
 import { closeInput, requestInput } from './terminal.js'
 import { filesForRun, checkPackages } from './run-permissions.js'
-import { startSandbox } from './sandbox.js'
+import { startSandbox, discardPythonSession } from './sandbox.js'
 
 const permissions = new Map()
 const accessFor = id => permissions.get(id) || {sharedIds:[], online:false}
@@ -53,7 +53,11 @@ function scheduleSave() {
   if (!saveTimer) savedStatus('Đang lưu…','clock-3')
   clearTimeout(saveTimer); saveTimer=setTimeout(()=>{saveTimer=0;persist()},250)
 }
-window.addEventListener('pagehide',persist)
+window.addEventListener('pagehide',()=>{
+  if(task)stop()
+  discardPythonSession()
+  persist()
+})
 document.addEventListener('visibilitychange',()=>{if(document.hidden)persist()})
 
 function setTheme(theme) {
@@ -165,6 +169,7 @@ function showFiles() {
 function openFile(file) {
   if(current().id!==file.id) {
     if(task)stop()
+    discardPythonSession()
     workspace.active=file.id;editor.open(file.code)
     $('stdin').value=file.stdin || ''; resetConsole(); persist()
   }
@@ -208,7 +213,7 @@ function nameDialog(file) {
       input.setCustomValidity(name?'Tên này đã được sử dụng.':'Hãy nhập tên tệp hợp lệ, ví dụ bai_tap.py.');input.reportValidity();return
     }
     modal.close()
-    if(file){file.name=name;showFiles();persist()} else {addFile(name);editor.focus()}
+    if(file){if(task)stop();discardPythonSession();file.name=name;showFiles();persist()} else {addFile(name);editor.focus()}
   })
 }
 function fileOptions(file) {
@@ -217,6 +222,7 @@ function fileOptions(file) {
     dialog('Xóa '+file.name+'?',elem('p','','Tệp này sẽ được xóa khỏi không gian trên thiết bị. Bạn có thể tải một bản .py trước khi xóa.'),[['cancel','Giữ tệp','secondary'],['ok','Xóa tệp','primary']],()=>{
       modal.close()
       if(task)stop()
+      discardPythonSession()
       const wasCurrent=workspace.active===file.id
       workspace.files=workspace.files.filter(f=>f.id!==file.id)
       if(!workspace.files.length)workspace.files.push({...starter,id:'main'})
@@ -288,7 +294,10 @@ function runButton(busy) {
   const mac=/Mac|iPhone|iPad/.test(navigator.platform)
   $('run').replaceChildren(icon(busy?'square':'play'),elem('span','',busy?'Dừng':'Chạy mã'),elem('kbd','',mac?'⌘ B':'Ctrl B'))
 }
-function finish() { if(task)task.terminate();task=null;closeInput();runButton(false) }
+function finish(reuse=false) {
+  if(task) {if(reuse)task.release();else task.terminate()}
+  task=null;closeInput();runButton(false)
+}
 function stop() { finish();status('Đã dừng');$('elapsed').textContent='' }
 function appendOutput(text,isError=false,isInput=false) {
   const box=$('out-panel'),follow=box.scrollHeight-box.scrollTop-box.clientHeight<36
@@ -312,7 +321,8 @@ async function runOrStop() {
       if (task !== worker) return
       finish();status('Lỗi bộ chạy','error');appendOutput(String(message).slice(0,1600),true)
     }
-    const worker=startSandbox(job, data=>{
+    const key=JSON.stringify([entry.id,entry.name,job.online,job.requirements,access.sharedIds,job.files.map(f=>f.name)])
+    const worker=startSandbox(key, job, data=>{
       if(task!==worker)return
       if (++events > 10000) {fail('Đã dừng sau quá nhiều thông báo.');return}
       if(data.type==='packages' && typeof data.name==='string')status('Đang nạp '+data.name.slice(0,180)+'…','busy')
@@ -335,12 +345,13 @@ async function runOrStop() {
         displayPlot({...data,title:data.title.slice(0,240)},$('output'),$('out-panel'))
       }
       if(data.type==='done' && Number.isFinite(data.ms) && typeof data.ok==='boolean'){
-        finish();status(data.ok?'Hoàn tất':'Có lỗi',data.ok?'':'error')
+        finish(data.ok && data.reusable===true);status(data.ok?'Hoàn tất':'Có lỗi',data.ok?'':'error')
         $('elapsed').textContent=new Intl.NumberFormat('vi-VN',{maximumFractionDigits:2}).format(data.ms/1000)+' s'
       }
       if(data.type==='failure' && typeof data.message==='string')fail(data.message)
     }, fail)
     task=worker
+    if(worker.warm)status('Đang chạy…','busy')
   } catch(err){finish();status('Lỗi bộ chạy','error');appendOutput(err.message,true)}
 }
 $('run').onclick=runOrStop
@@ -374,7 +385,13 @@ $('packages').onclick=()=>{
       catch(error){notify(error.message)}
       return
     }
-    permissions.set(entry.id,{sharedIds,online:online.checked,requirements:input.value.trim()})
+    const requirements=input.value.trim()
+    if(online.checked!==access.online || requirements!==(access.requirements || '') ||
+      JSON.stringify(sharedIds)!==JSON.stringify(access.sharedIds)) {
+      if(task)stop()
+      discardPythonSession()
+    }
+    permissions.set(entry.id,{sharedIds,online:online.checked,requirements})
     workspace.requirements=input.value.trim();persist();modal.close();notify('Đã lưu quyền chạy cho tệp này trong phiên hiện tại.')
   })
 }

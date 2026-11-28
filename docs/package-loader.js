@@ -1,8 +1,8 @@
 // Only entries from the Pyodide release lock can be requested through the editor.
 const runtimeIndex = 'https://runtime.invalid/'
+const nativeFetch = self.fetch.bind(self)
 function setupRuntimeAssets(port, online, readInput) {
   const waiting = new Map()
-  const nativeFetch = self.fetch.bind(self)
   port.onmessage = ({data}) => {
     if (data.type === 'stdin') {readInput(data.value);return}
     const pending = waiting.get(data.name)

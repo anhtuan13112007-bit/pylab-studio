@@ -11,7 +11,7 @@ async function readAsset(path) {
 }
 async function loadSetup() {
   const [scripts, catalog, lock, scanner, installer] = await Promise.all([
-    Promise.all(['runtime/pyodide.js','runtime/pyodide.asm.js','package-loader.js','runner.js'].map(readAsset)),
+    Promise.all(['runtime/pyodide.js','runtime/pyodide.asm.js','package-loader.js?protocol=2','runner.js?protocol=2'].map(readAsset)),
     readAsset('runtime/package-sources.json').then(JSON.parse),
     readAsset('runtime/pyodide-lock.json').then(JSON.parse),
     readAsset('workspace-imports.py'), readAsset('install-packages.py')
@@ -28,7 +28,14 @@ async function loadSetup() {
   }
   return {source:scripts.join('\n;\n'), assets, imports:catalog.imports, scanner, installer}
 }
-export function startSandbox(job, onMessage, onError) {
+let session
+const idleTimeout = 10 * 60 * 1000
+export function discardPythonSession() {
+  session?.close()
+  session = null
+}
+
+function createSession(key, online) {
   const frame = document.createElement('iframe')
   frame.hidden = true
   frame.setAttribute('sandbox','allow-scripts')
@@ -36,7 +43,42 @@ export function startSandbox(job, onMessage, onError) {
   frame.src = local('sandbox.html')
   const {port1, port2} = new MessageChannel()
   const errors = new MessageChannel()
-  errors.port1.onmessage = () => onError('Không khởi động được Python trong vùng cách ly.')
+  const current = {
+    key, control:port1, idleTimer:0, onError:null,
+    close() {
+      clearTimeout(current.idleTimer)
+      frame.onload = frame.onerror = null
+      port1.close();port2.close();errors.port1.close();errors.port2.close();frame.remove()
+    }
+  }
+  function fail(message) {
+    if (session !== current) return
+    if (current.onError) current.onError(message)
+    else discardPythonSession()
+  }
+  errors.port1.onmessage = () => fail('Không khởi động được Python trong vùng cách ly.')
+  if (!setup) setup = loadSetup().catch(error => {setup=null;throw error})
+  frame.onload = async () => {
+    try {
+      const {source} = await setup
+      if (session === current) frame.contentWindow.postMessage({source,job:{online}}, '*', [port2,errors.port2])
+    } catch (error) {fail(error.message)}
+  }
+  frame.onerror = () => fail('Không mở được vùng chạy Python.')
+  document.body.append(frame)
+  return current
+}
+
+export function startSandbox(key, job, onMessage, onError) {
+  const warm = session?.key === key
+  if (!warm) {
+    discardPythonSession()
+    session = createSession(key, job.online)
+  }
+  const current = session
+  clearTimeout(current.idleTimer)
+  current.onError = onError
+  const {port1, port2} = new MessageChannel()
   const abort = new AbortController()
   let budget = 300000, runningSince = null, executionTimer
   function resume() {
@@ -54,8 +96,7 @@ export function startSandbox(job, onMessage, onError) {
   let sent = 0
   const served = new Set()
   async function start() {
-    if (!setup) setup = loadSetup().catch(err => {setup=null;throw err})
-    const {source, assets, imports, scanner, installer} = await setup
+    const {assets, imports, scanner, installer} = await setup
     if (abort.signal.aborted) return
     port1.onmessage = async ({data}) => {
       if (!data || abort.signal.aborted) return
@@ -82,16 +123,23 @@ export function startSandbox(job, onMessage, onError) {
         if (!abort.signal.aborted) port1.postMessage({type:'asset',name:data.name,error:error.message})
       }
     }
-    frame.contentWindow.postMessage({source, job:{...job, imports, scanner, installer}}, '*', [port2,errors.port2])
+    current.control.postMessage({...job, imports, scanner, installer}, [port2])
   }
-  frame.onload = () => start().catch(error => {if (!abort.signal.aborted) onError(error.message)})
-  frame.onerror = () => onError('Không mở được vùng chạy Python.')
-  document.body.append(frame)
+  start().catch(error => {if (!abort.signal.aborted) onError(error.message)})
+  function finishRun() {
+    clearTimeout(timer);clearTimeout(executionTimer);abort.abort();port1.close();port2.close()
+    current.onError = null
+  }
   return {
+    warm,
     answer(value) {resume();port1.postMessage({type:'stdin',value})},
+    release() {
+      finishRun()
+      if (session === current) current.idleTimer = setTimeout(discardPythonSession, idleTimeout)
+    },
     terminate() {
-      clearTimeout(timer);clearTimeout(executionTimer);abort.abort();port1.close();port2.close()
-      errors.port1.close();errors.port2.close();frame.remove()
+      finishRun()
+      if (session === current) discardPythonSession()
     }
   }
 }

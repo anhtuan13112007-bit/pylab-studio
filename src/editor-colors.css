@@ -2,6 +2,21 @@
 :root{--tok-keyword:#893b80;--tok-string:#26704a;--tok-number:#986026;--tok-function:#285d91;--tok-comment:#69766b}
 :root[data-theme=dark]{--tok-keyword:#dfa1da;--tok-string:#a4d3a2;--tok-number:#ecc695;--tok-function:#a4c6ec;--tok-comment:#a5b2a3}
 
+/* A narrow dark outline keeps pale glyphs legible over both bright and dark
+   frames without adding a veil over the wallpaper. */
+:root[data-theme=light][data-editor-contrast=bright] .editor-pane {
+  --code-ink:#f8fafc; --code-muted:#dce4ef;
+  --tok-keyword:#f4c6f3; --tok-string:#baf3c9; --tok-number:#ffdc9b;
+  --tok-function:#bbddff; --tok-comment:#d5dce6;
+  --code-shadow:0 1px 2px #121923,-1px 0 1px #121923,1px 0 1px #121923,0 -1px 1px #121923;
+}
+.editor-pane .cm-content,.editor-pane #filename {color:var(--code-ink,var(--ink));text-shadow:var(--code-shadow,none)}
+.editor-pane .cm-gutters,.editor-pane .editor-foot {
+  color:var(--code-muted,var(--muted));text-shadow:var(--code-shadow,none)
+}
+.editor-pane .tools .icon:not(:hover) {color:var(--code-muted,var(--muted))}
+#editor .cm-cursor {border-left-color:var(--code-ink,var(--ink));filter:drop-shadow(0 0 1px var(--code-ink,transparent))}
+
 #editor {
   --selection-bg:#285994;
   --selection-ink:#fff;
@@ -18,6 +33,7 @@
 #editor .cm-selectedText, #editor .cm-selectedText * {
   background-color:var(--selection-fill);
   color:var(--selection-ink);
+  text-shadow:none;
 }
 #editor .cm-activeLine:has(.cm-selectedText) {background:transparent}
 #editor .cm-line::selection, #editor .cm-line *::selection {

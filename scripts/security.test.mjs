@@ -6,6 +6,7 @@ import vm from 'node:vm'
 import {filesForRun, checkPackages} from '../src/run-permissions.js'
 import {fitPhoto} from '../src/background-photo.js'
 import {readVideo} from '../src/background-video.js'
+import {startSandbox, discardPythonSession} from '../src/sandbox.js'
 
 test('Video nền kiểm tra chữ ký tệp và có thể hủy trước khi mở bộ giải mã', async () => {
   const signal=new AbortController().signal
@@ -90,4 +91,58 @@ test('Chế độ tải gói chỉ cho các kho được khai báo và bỏ cred
   await assert.rejects(read('https://example.invalid/fixture'))
   assert.equal(calls.length,2)
   assert.ok(calls.every(({options}) => options.credentials === 'omit' && options.referrerPolicy === 'no-referrer'))
+})
+
+test('Các lượt chạy trong một phiên dùng cổng riêng và đổi phiên tạo iframe mới', async t => {
+  const frames = new Set()
+  const ports = new Set()
+  const doc = {
+    baseURI:'https://studio.invalid/',
+    createElement() {
+      const frame = {
+        setAttribute() {},
+        contentWindow:{postMessage(_init, _origin, [control, errors]) {
+          frame.remove = () => {control.close();errors.close();frames.delete(frame)}
+          control.onmessage = event => {
+            const jobPort = event.ports[0]
+            ports.add(jobPort)
+            jobPort.postMessage({type:'done',ok:true,reusable:true,ms:1})
+            jobPort.close()
+          }
+        }}
+      }
+      return frame
+    },
+    body:{append(frame) {frames.add(frame);queueMicrotask(() => frame.onload())}}
+  }
+  // Node runs the control channel with its native MessagePorts. Only the
+  // browser frame and the public files it would fetch are replaced here.
+  const previous = globalThis.document
+  globalThis.document = doc
+  t.after(() => {
+    discardPythonSession()
+    if (previous === undefined) delete globalThis.document
+    else globalThis.document = previous
+  })
+  t.mock.method(globalThis, 'fetch', async () => new Response('{"packages":{},"remoteFiles":[],"imports":{}}'))
+  async function run(key, reuse) {
+    const done = Promise.withResolvers()
+    const task = startSandbox(key, {online:false}, done.resolve, done.reject)
+    assert.equal((await done.promise).type,'done')
+    const frame = [...frames][0]
+    assert.equal(frames.size,1)
+    if (reuse) task.release()
+    else task.terminate()
+    return {frame,warm:task.warm}
+  }
+  const first = await run('bai-a',true)
+  const second = await run('bai-a',true)
+  assert.equal(first.warm,false)
+  assert.equal(second.warm,true)
+  assert.equal(first.frame,second.frame)
+  const third = await run('bai-b',false)
+  assert.equal(third.warm,false)
+  assert.notEqual(third.frame,first.frame)
+  assert.equal(frames.size,0)
+  assert.equal(ports.size,3)
 })

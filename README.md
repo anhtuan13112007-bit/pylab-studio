@@ -34,11 +34,11 @@ Mở địa chỉ máy chủ in ra, mặc định là `http://127.0.0.1:4173`. M
 | Thanh trên | Bấm mũi tên **⌃** ở góc phải để thu thanh có nút **Hình nền** lên trên. Bấm mũi tên **⌄** ở mép trên để mở lại. Nút dùng được bằng chuột, cảm ứng hoặc phím Tab rồi Enter. Trình duyệt nhớ lựa chọn sau khi tải lại, riêng cho bản local và GitHub Pages. |
 | Thanh bên | Mũi tên trên thanh trên cùng thu hoặc mở thanh AT Python. Chuyển giữa trình soạn thảo và thư viện. Dấu `+` tạo tệp. Nút `⋯` đổi tên hoặc xóa tệp sau khi xác nhận. Nhập mã UTF-8 từ tệp `.py` tối đa 1 MB. Tệp nhập trùng tên nhận hậu tố. |
 | Trình soạn thảo | Tô màu cú pháp, đánh số dòng, thụt lề 4 dấu cách, đánh dấu cặp ngoặc, gấp khối, tìm trong mã và hoàn tác. Thanh dưới hiển thị vị trí con trỏ. |
-| Bàn làm việc | Chạy tệp đang mở, dừng ngay cả khi mã lặp vô hạn, tải tệp hiện tại hoặc mở rộng vùng làm việc. Mỗi lần chạy dùng một môi trường Python mới. |
+| Bàn làm việc | Lần chạy đầu của bài khởi động Python. Khi sửa và chạy lại cùng bài, trang dùng lại Python và những thư viện đã nạp. Nút Dừng kết thúc cả bộ chạy, kể cả khi mã lặp vô hạn. |
 | Terminal | Xem lệnh chạy, kết quả, lỗi và thời gian thực thi sau khi nạp Python. Traceback hiển thị tên tệp và số dòng. Nút thùng rác xóa phần hiển thị. Đầu ra giới hạn 65.536 ký tự để bảo vệ độ phản hồi. |
 | Đầu vào | Tệp mới nhận dữ liệu trực tiếp trong Terminal. Gõ một dòng tại dấu nhắc rồi bấm Enter. Dùng Ctrl+D hoặc nút EOF để báo kết thúc luồng nhập. Thẻ Đầu vào cho phép chuyển sang dữ liệu soạn sẵn để chạy lại một bộ test. Tệp cũ có sẵn dữ liệu vẫn dùng chế độ soạn sẵn. |
 | Hình nền | Mở **Hình nền** trên thanh trên cùng. Chọn ảnh hoặc **Video từ máy** (MP4/WebM, hỗ trợ 4K), xem trước rồi bấm **Lưu giao diện**. Hai thanh trượt chỉnh riêng độ trong suốt của trình soạn thảo và Terminal. Có thể tạm dừng video ngay trên thanh trên. |
-| Tệp và mô-đun | Mặc định, thư mục Python ảo chỉ có tệp đang chạy. Trong **Gói và tệp**, đánh dấu mô-đun bạn muốn bài này được đọc rồi bấm **Lưu**. Những tệp mới do chính chương trình Python ghi ra chỉ tồn tại trong lần chạy đó. |
+| Tệp và mô-đun | Mặc định, thư mục bài chỉ có tệp đang chạy. Trong **Gói và tệp**, đánh dấu mô-đun bạn muốn bài này được đọc rồi bấm **Lưu**. Mỗi lần chạy có thư mục bài và thư mục tạm mới. |
 | Thư viện mẫu | 8 bài về biến, nhập liệu, vòng lặp, dữ liệu và toán học. Tìm theo tên, chủ đề, tên tệp hoặc mô tả. Mở lại một mẫu sẽ quay về bản bạn đã sửa. |
 | Thiết bị và hiển thị | Bài làm và giao diện sáng/tối được lưu trong trình duyệt. Máy tính hiển thị mã và kết quả cạnh nhau. Điện thoại xếp hai khung theo chiều dọc và thu thanh bên vào nút menu. |
 
@@ -47,6 +47,14 @@ Trang mở đầu tự chạy bài chào mẫu khi không gian chỉ còn tệp 
 Kéo tay nắm có vạch chéo ở chân trình soạn thảo hoặc Terminal để đổi kích thước. Trên máy tính, hai khung chia sẻ chiều rộng và có chiều cao riêng. Khi xếp dọc trên điện thoại, bạn chỉnh được cả hai chiều của từng khung độc lập. Bạn cũng có thể bấm tay nắm (hoặc dùng Tab rồi Enter), chỉnh hai thanh trượt bằng phím mũi tên và chọn **Mặc định** để đặt lại. Trình duyệt nhớ kích thước riêng cho hai kiểu bố cục.
 
 Ở chế độ sáng, video nền hiển thị nguyên màu. Vào **Hình nền** để tùy chỉnh độ trong suốt của từng khung. Khi bôi đen mã, chữ và nền vùng chọn dùng một cặp màu tương phản theo giao diện sáng hoặc tối. Trình soạn thảo và Terminal dùng màu mặc định cho các thao tác chuột. Hiệu ứng neon ở các khu vực còn lại tuân theo cài đặt giảm chuyển động của thiết bị.
+
+Khi dùng ảnh hoặc video ở chế độ sáng và đặt **độ trong suốt của trình soạn thảo từ 50%**, chữ thường, số dòng và màu cú pháp chuyển sang tông sáng. Bóng tối mảnh quanh chữ giúp đọc mã khi video chuyển từ cảnh tối sang cảnh sáng. Bạn có thể thử trực tiếp bằng thanh trượt trong **Hình nền**.
+
+### Khi chạy lại một bài
+
+Lần đầu, Python khởi động và nạp các gói bài cần. Những lần tiếp theo trong cùng phiên dùng lại thư viện đã nạp. Bạn có thể sửa mã, thêm lệnh import hoặc đổi dữ liệu nhập rồi bấm **Chạy mã**. Biến của chương trình bắt đầu lại từ đầu. Hai thư mục `/home/pyodide` và `/tmp` được tạo mới cho từng lượt, kể cả khi tên tệp trùng với lượt trước. Một số trạng thái bên trong thư viện, chẳng hạn tùy chỉnh toàn cục của NumPy, có thể được giữ trong phiên.
+
+Đổi bài, thay đổi quyền trong **Gói và tệp**, dừng chương trình hoặc tải lại trang sẽ kết thúc phiên. Phiên cũng được giải phóng sau lỗi, khi bài còn tác vụ asyncio đang chờ lúc kết thúc hoặc sau 10 phút nghỉ giữa hai lượt. Nếu muốn đặt lại toàn bộ trạng thái thư viện, hãy tải lại trang.
 
 ### Phím tắt
 
@@ -115,6 +123,8 @@ print(binh_phuong(7))
 **Đổi giao diện.** Mở `src/style.css`. Sửa biến `--page`, `--surface`, `--ink`, `--green` cho nền, khung, chữ và màu nhấn. Cập nhật cả khối `:root[data-theme=dark]`. Đổi màu nút chạy ở `.primary` và tiêu đề bàn làm việc ở `index.html`. Xem lại trên màn hình hẹp và rộng bằng `npm run dev`.
 
 **Đổi bài chào mặc định.** Sửa `starter.code` và `starter.stdin` trong `src/examples.js`. Để xem như người mới, thử bằng một hồ sơ trình duyệt khác. Các tệp người học đã lưu vẫn giữ nội dung của họ.
+
+**Chỉnh màu mã trên hình nền.** Trong `src/appearance.js`, hàm `apply()` đặt `data-editor-contrast` khi có ảnh hoặc video và độ trong suốt đạt ngưỡng. Sửa bảng màu `--code-ink`, `--code-muted`, `--tok-*` và bóng chữ `--code-shadow` ở `src/editor-colors.css`. Màu của đoạn đang bôi đen có biến `--selection-*` riêng. Sau khi sửa, thử độ trong suốt 0%, 50% và 100% với cả vùng sáng lẫn vùng tối của cùng hình nền.
 
 ## 5. Thêm bài mẫu
 
@@ -199,7 +209,11 @@ Với NumPy, dùng `import numpy as np` rồi gọi `np.array([1, 2, 3, 4])`. T�
 
 Ảnh nền JPG, PNG và WebP được kiểm tra định dạng thực, giới hạn 8 MB và 32 triệu điểm ảnh. AT Python vẽ lại ảnh thành JPEG rồi lưu bản thu nhỏ trong trình duyệt. Việc chọn ảnh, xem trước và lưu diễn ra trên thiết bị. Video được phát trực tiếp từ bản sao trên thiết bị, giữ độ phân giải gốc và tắt tiếng. Ảnh toàn trang đã lưu ở bản cũ vẫn được đọc. Hình nền mới và tùy chỉnh được lưu bằng IndexedDB khi trình duyệt hỗ trợ. Đóng hộp thoại sẽ bỏ thay đổi chưa lưu.
 
-Mỗi lần bấm **Chạy mã**, trang tạo một iframe sandbox chỉ có quyền chạy script. Web Worker của Python có origin riêng dạng opaque. Trang soạn thảo gửi bản sao các tệp được chọn và chỉ chuyển dòng nhập khi Terminal yêu cầu. Lớp trung gian chỉ phục vụ tài nguyên có trong bản phát hành. Các gói Pyodide được kiểm tra SHA-256 theo lockfile.
+Mỗi phiên có một iframe sandbox chỉ có quyền chạy script. Worker Python có origin riêng dạng opaque. Mỗi lần chạy, trang mở một kênh thông báo riêng, gửi lại nội dung hiện tại của các tệp được cấp quyền và chỉ chuyển dòng nhập khi Terminal yêu cầu. Lớp trung gian phục vụ tài nguyên trong danh mục phát hành. Các gói Pyodide được kiểm tra SHA-256 theo lockfile.
+
+**Bảo trì cơ chế dùng lại Python.** `runOrStop()` trong `src/main.js` tạo khóa phiên từ ID và tên bài, danh sách tệp được chia sẻ, quyền mạng và khai báo gói. `src/sandbox.js` quản lý iframe, thời gian nghỉ và kênh liên lạc cho từng lượt. Trong `public/runner.js`, `loadPyodide()` chạy lúc tạo phiên. Mỗi lượt có bộ biến mới, hai thư mục MEMFS mới và các luồng nhập/xuất riêng. Khi hoàn tất, bộ chạy gỡ các mô-đun của bài và đóng các hình Matplotlib. `public/package-loader.js` cùng `public/install-packages.py` kiểm tra import mới. Khi sửa cách cấp quyền, cập nhật khóa phiên và thử cả thao tác thu hồi quyền giữa hai lượt.
+
+**Kiểm tra tốc độ sau khi sửa.** Mở thẻ Network trong công cụ nhà phát triển của trình duyệt. Chạy `import numpy as np; print(np.arange(10).sum())` hai lần rồi đổi `10` thành `12` và chạy tiếp. Kết quả phải lần lượt là `45`, `45`, `66`. Trong cùng phiên chỉ cần một lượt tải `pyodide.asm.wasm` và wheel NumPy. Khi so sánh tốc độ, đo từ lúc bấm **Chạy mã** đến lúc có kết quả. Đồng hồ ở chân Terminal bắt đầu sau bước chuẩn bị Python và thư viện.
 
 Mặc định Worker có chính sách `connect-src 'none'`. Khi bạn bật quyền Internet trong **Gói và tệp**, mã trong bài và các thư viện của nó có thể kết nối tới PyPI và kho tệp PyPI. Trang soạn thảo chỉ tải các archive Pyodide có tên và hash đã biết từ jsDelivr. Dùng các gói đóng sẵn nếu bài cần xử lý dữ liệu riêng.
 

@@ -67,6 +67,8 @@ export function setupAppearance(notify) {
       $(id).value=draft[prop];$(id+'-value').textContent=draft[prop]+'%'
     }
     const photo=draft.page==='image' && draft.pagePhoto
+    const hasMedia = photo || (draft.page==='video' && draft.video)
+    document.documentElement.dataset.editorContrast = hasMedia && draft.editorGlass >= 50 ? 'bright' : 'normal'
     wallpaper.style.backgroundImage=photo?'url("'+photo+'")':'none'
     wallpaper.hidden=!photo && !(draft.page==='video' && draft.video)
     $('page-palette').value=draft.page
